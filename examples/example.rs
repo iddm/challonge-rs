@@ -83,7 +83,7 @@ fn main() {
         misc: "PIZDEC ON KRASAVCHIK".to_owned(),
     };
     println!("Participant result: {:?}", c.create_participant(TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
-    pc.clone()));
+    &pc));
 
     println!("Matches: {:?}", c.match_index(TournamentId::Url("subdomain".to_owned(), "test1".to_owned()), None, None));
 }

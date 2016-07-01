@@ -115,18 +115,18 @@ fn pairs_to_string(params: Vec<(&'static str, String)>) -> String {
     body
 }
 
-fn pc_to_pairs(participant: ParticipantCreate) -> Vec<(&'static str, String)>{
+fn pc_to_pairs(participant: &ParticipantCreate) -> Vec<(&'static str, String)>{
     let mut params = vec![
-        (p!("email"), participant.email),
+        (p!("email"), participant.email.clone()),
         (p!("seed"), participant.seed.to_string()),
-        (p!("misc"), participant.misc),
+        (p!("misc"), participant.misc.clone()),
     ];
    
-    if let Some(n) = participant.name {
-        params.push((p!("name"), n));
+    if let Some(n) = participant.name.as_ref() {
+        params.push((p!("name"), n.clone()));
     }
-    if let Some(un) = participant.challonge_username {
-        params.push((p!("challonge_username"), un));
+    if let Some(un) = participant.challonge_username.as_ref() {
+        params.push((p!("challonge_username"), un.clone()));
     }
     params
 }
@@ -164,7 +164,7 @@ fn tc_to_pairs(tournament: &TournamentCreate) -> Vec<(&'static str, String)> {
     }
     params
 }
-fn mu_to_pairs(mu: MatchUpdate) -> Vec<(&'static str, String)>{
+fn mu_to_pairs(mu: &MatchUpdate) -> Vec<(&'static str, String)>{
     let mut params = Vec::new();
     
     if let Some(v) = mu.player1_votes {
@@ -174,9 +174,9 @@ fn mu_to_pairs(mu: MatchUpdate) -> Vec<(&'static str, String)>{
         params.push((m!("player2_votes"), v.to_string()));
     }
     if !mu.scores_csv.is_empty() {
-        params.push((m!("scores_csv"), mu.scores_csv));
+        params.push((m!("scores_csv"), mu.scores_csv.clone()));
     }
-    if let Some(w) = mu.winner_id {
+    if let Some(w) = mu.winner_id.as_ref() {
         params.push((m!("winner_id"), w.0.to_string()));
     }
     params
@@ -397,7 +397,7 @@ impl Challonge {
     /// Add a participant to a tournament (up until it is started). 
     pub fn create_participant(&self,
                               id: TournamentId,
-                              participant: ParticipantCreate) -> Result<Participant, Error> {
+                              participant: &ParticipantCreate) -> Result<Participant, Error> {
         let url = &format!("{}/tournaments/{}/participants.json",
                            API_BASE,
                            id.to_string());
@@ -436,7 +436,7 @@ impl Challonge {
     pub fn update_participant(&self,
                               id: TournamentId,
                               participant_id: ParticipantId,
-                              participant: ParticipantCreate) -> Result<(), Error> {
+                              participant: &ParticipantCreate) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}/participants/{}.json",
                            API_BASE,
                            id.to_string(),
@@ -542,7 +542,7 @@ impl Challonge {
     pub fn update_match(&self,
                         id: TournamentId,
                         match_id: MatchId,
-                        match_update: MatchUpdate) -> Result<Match, Error> {
+                        match_update: &MatchUpdate) -> Result<Match, Error> {
         let url = &format!("{}/tournaments/{}/matches/{}.json",
                            API_BASE,
                            id.to_string(),
