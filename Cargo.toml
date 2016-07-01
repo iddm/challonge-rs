@@ -5,7 +5,7 @@ authors = ["Victor Polevoy <maintainer@vpolevoy.com>"]
 
 description = "Client library for the Challonge API"
 readme = "README.md"
-license = "GPLv3"
+license = "GPL-3.0"
 keywords = ["challonge", "tourney", "tournament", "api", "system"]
 
 repository = "https://github.com/vityafx/challonge-rs"
