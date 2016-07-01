@@ -1,4 +1,4 @@
-challonge-rs [![](https://meritbadge.herokuapp.com/challonge)] [![](https://img.shields.io/badge/docs-online-2020ff.svg)(https://vityafx.github.io/challonge-rs/challonge/)]
+challonge-rs [![](https://meritbadge.herokuapp.com/challonge)](https://crates.io/crates/challonge) [![](https://img.shields.io/badge/docs-online-2020ff.svg)](https://vityafx.github.io/challonge-rs/challonge/)
 
 
 Client library for the [Challonge](https://challonge.com) REST API.
