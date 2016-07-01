@@ -9,7 +9,7 @@ license = "GPLv3"
 keywords = ["challonge", "tourney", "tournament", "api", "system"]
 
 repository = "https://github.com/vityafx/challonge-rs"
-#documentation = "http://wombat.platymuus.com/rustdoc/discord_0.5.0/"
+documentation = "https://vityafx.github.io/challonge-rs/challonge/"
 
 [dependencies]
 hyper = "0.9.7"
