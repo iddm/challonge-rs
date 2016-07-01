@@ -130,13 +130,13 @@ fn pc_to_pairs(participant: ParticipantCreate) -> Vec<(&'static str, String)>{
     }
     params
 }
-fn tc_to_pairs(tournament: TournamentCreate) -> Vec<(&'static str, String)>{
+fn tc_to_pairs(tournament: &TournamentCreate) -> Vec<(&'static str, String)> {
     let mut params: Vec<(&'static str, String)> = vec![
-        (t!("name"), tournament.name),
+        (t!("name"), tournament.name.clone()),
         (t!("tournament_type"), tournament.tournament_type.to_string()),
-        (t!("url"), tournament.url),
-        (t!("subdomain"), tournament.subdomain),
-        (t!("description"), tournament.description),
+        (t!("url"), tournament.url.clone()),
+        (t!("subdomain"), tournament.subdomain.clone()),
+        (t!("description"), tournament.description.clone()),
         (t!("open_signup"), tournament.open_signup.to_string()),
         (t!("hold_third_place_match"), tournament.hold_third_place_match.to_string()),
         (t!("pts_for_match_win"), tournament.pts_for_match_win.to_string()),
@@ -159,8 +159,8 @@ fn tc_to_pairs(tournament: TournamentCreate) -> Vec<(&'static str, String)>{
         (t!("start_at"), tournament.start_at.to_rfc3339()),
         (t!("check_in_duration"), tournament.check_in_duration.to_string()),
     ];
-    if let Some(gfm) = tournament.grand_finals_modifier {
-        params.push((t!("grand_finals_modifier"), gfm));
+    if let Some(gfm) = tournament.grand_finals_modifier.as_ref() {
+        params.push((t!("grand_finals_modifier"), gfm.clone()));
     }
     params
 }
@@ -306,7 +306,7 @@ impl Challonge {
     /// let t = c.create_tournament(tc.clone());
     /// assert!(t.is_ok());
     /// ```
-    pub fn create_tournament(&self, tournament: TournamentCreate) -> Result<Tournament, Error> {
+    pub fn create_tournament(&self, tournament: &TournamentCreate) -> Result<Tournament, Error> {
         let url = &format!("{}/tournaments.json", API_BASE);
         let body = pairs_to_string(tc_to_pairs(tournament));
         let response = try!(retry(|| self.client.post(url)
@@ -318,7 +318,7 @@ impl Challonge {
     /// Update a tournament's attributes. 
     pub fn update_tournament(&self,
                              id: TournamentId,
-                             tournament: TournamentCreate) -> Result<Tournament, Error> {
+                             tournament: &TournamentCreate) -> Result<Tournament, Error> {
         let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
         let body = pairs_to_string(tc_to_pairs(tournament));
         let response = try!(retry(|| self.client.put(url)

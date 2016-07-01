@@ -59,11 +59,11 @@ fn main() {
         check_in_duration: 60,
         grand_finals_modifier: None,
     };
-    let t = c.create_tournament(tc.clone());
+    let t = c.create_tournament(&tc);
     println!("Created tournament: {:?}", t);
 
 
-    let tt = c.update_tournament(TournamentId::Id(2674470), tc);
+    let tt = c.update_tournament(TournamentId::Id(2674470), &tc);
     println!("Updated tournament: {:?}", tt);
 
     println!("Delete result: {:?}", c.delete_tournament(TournamentId::Id(2674588)));
