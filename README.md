@@ -7,7 +7,7 @@ Client library for the [Challonge](https://challonge.com) REST API.
  2. Call API methods to interact with the service.
 
 ## Documentation
-[Documentation](http://google.com)
+[Documentation](https://vityafx.github.io/challonge-rs/challonge/)
 
 [Challonge API documentation](http://api.challonge.com/ru/v1/documents).
 
