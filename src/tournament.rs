@@ -22,6 +22,14 @@ fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> 
     map.remove(key).ok_or(Error::Decode("Unexpected absent key", Value::String(key.into())))
 }
 
+/// Tournament includes.
+#[derive(Debug, Clone)]
+pub enum TournamentIncludes {
+    All,
+    Matches,
+    Participants,
+}
+
 /// Tournament ranking order.
 #[derive(Debug, Clone)]
 pub enum RankedBy {
@@ -33,20 +41,20 @@ pub enum RankedBy {
 }
 impl fmt::Display for RankedBy {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &RankedBy::MatchWins => {
+        match *self {
+            RankedBy::MatchWins => {
                 try!(fmt.write_str("match wins"));
             },
-            &RankedBy::GameWins => {
+            RankedBy::GameWins => {
                 try!(fmt.write_str("game wins"));
             },
-            &RankedBy::PointsScored => {
+            RankedBy::PointsScored => {
                 try!(fmt.write_str("points scored"));
             },
-            &RankedBy::PointsDifference => {
+            RankedBy::PointsDifference => {
                 try!(fmt.write_str("points difference"));
             },
-            &RankedBy::Custom => {
+            RankedBy::Custom => {
                 try!(fmt.write_str("custom"));
             },
         }
@@ -62,15 +70,68 @@ pub enum TournamentId {
 }
 impl fmt::Display for TournamentId {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &TournamentId::Url(ref subdomain, ref tournament_url) => {
+        match *self {
+            TournamentId::Url(ref subdomain, ref tournament_url) => {
                 try!(fmt.write_str(&format!("{}-{}", subdomain, tournament_url)));
             },
-            &TournamentId::Id(ref id) => {
+            TournamentId::Id(ref id) => {
                 try!(fmt.write_str(&id.to_string()));
             },
         }
         Ok(())
+    }
+}
+
+/// Game points definition.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GamePoints {
+    pub match_win: f64,
+    pub match_tie: f64,
+    pub game_win: f64,
+    pub game_tie: f64,
+    pub bye: Option<f64>,
+}
+impl GamePoints {
+    pub fn new(match_win: f64,
+               match_tie: f64,
+               game_win: f64,
+               game_tie: f64,
+               bye: Option<f64>) -> GamePoints {
+        GamePoints {
+            match_win: match_win,
+            match_tie: match_tie,
+            game_win: game_win,
+            game_tie: game_tie,
+            bye: bye,
+        }
+    }
+
+    pub fn decode(mut map: &mut BTreeMap<String, Value>, prefix: &str) -> Result<GamePoints, Error> {
+        let mut bye = None;
+        if let Ok(bye_pts) = remove(&mut map, &format!("{}pts_for_bye", prefix)) {
+            if let Ok(b) = bye_pts.as_string().unwrap_or("").to_owned().parse::<f64>() {
+                bye = Some(b);
+            }
+        }
+
+        Ok(GamePoints {
+            match_win: try!(remove(&mut map, &format!("{}pts_for_match_win", prefix))).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0f64),
+            match_tie: try!(remove(&mut map, &format!("{}pts_for_match_tie", prefix))).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0f64),
+            game_win: try!(remove(&mut map, &format!("{}pts_for_game_win", prefix))).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0f64),
+            game_tie: try!(remove(&mut map, &format!("{}pts_for_game_tie", prefix))).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0f64),
+            bye: bye,
+        })
+    }
+}
+impl Default for GamePoints {
+    fn default() -> GamePoints {
+        GamePoints {
+            match_win: 0.5f64,
+            match_tie: 1.0f64,
+            game_win: 0.0f64,
+            game_tie: 0.0f64,
+            bye: None,
+        }
     }
 }
 
@@ -98,19 +159,12 @@ pub struct TournamentCreate {
     pub hold_third_place_match: bool,
 
     /// Only for Swiss system
-    pub pts_for_match_win: f64,
-    pub pts_for_match_tie: f64,
-    pub pts_for_game_win: f64,
-    pub pts_for_game_tie: f64,
-    pub pts_for_bye: f64,
+    pub swiss_points: GamePoints,
     pub swiss_rounds: u64,
     pub ranked_by: RankedBy,
 
     /// Only for Round Robin system
-    pub rr_pts_for_match_win: f64,
-    pub rr_pts_for_match_tie: f64,
-    pub rr_pts_for_game_win: f64,
-    pub rr_pts_for_game_tie: f64,
+    pub round_robin_points: GamePoints,
 
     /// Single &amp; Double Elimination only - Label each round above the bracket (default: false)
     pub show_rounds: bool,
@@ -133,13 +187,59 @@ pub struct TournamentCreate {
     pub signup_cap: u64,
 
     /// the planned or anticipated start time for the tournament (Used with check_in_duration to determine participant check-in window). Timezone defaults to Eastern.
-    pub start_at: DateTime<UTC>,
+    pub start_at: Option<DateTime<UTC>>,
 
     /// Length of the participant check-in window in minutes.
     pub check_in_duration: u64,
 
     /// This option only affects double elimination. null/blank (default) - give the winners bracket finalist two chances to beat the losers bracket finalist, 'single match' - create only one grand finals match, 'skip' - don't create a finals match between winners and losers bracket finalists 
     pub grand_finals_modifier: Option<String>,
+}
+impl TournamentCreate { 
+    pub fn new() -> TournamentCreate {
+        TournamentCreate {
+            name: String::default(), 
+            tournament_type: TournamentType::SingleElimination,
+            url: String::default(),
+            subdomain: String::default(),
+            description: String::default(),
+            open_signup: false,
+            hold_third_place_match: false,
+            swiss_points: GamePoints::new(0.5f64, 1.0f64, 0.0f64, 0.0f64, Some(0.0f64)),
+            swiss_rounds: 0,
+            ranked_by: RankedBy::PointsScored,
+            round_robin_points: GamePoints::default(),
+            show_rounds: false,
+            private: false,
+            notify_users_when_matches_open: true,
+            notify_users_when_the_tournament_ends: true,
+            sequential_pairings: false,
+            signup_cap: 4,
+            start_at: None,
+            check_in_duration: 60,
+            grand_finals_modifier: None,
+        }
+    }
+
+    builder_s!(name);
+    builder!(tournament_type, TournamentType);
+    builder_s!(url);
+    builder_s!(subdomain);
+    builder_s!(description);
+    builder!(open_signup, bool);
+    builder!(hold_third_place_match, bool);
+    builder!(swiss_points, GamePoints);
+    builder!(swiss_rounds, u64);
+    builder!(ranked_by, RankedBy);
+    builder!(round_robin_points, GamePoints);
+    builder!(show_rounds, bool);
+    builder!(private, bool);
+    builder!(notify_users_when_matches_open, bool);
+    builder!(notify_users_when_the_tournament_ends, bool);
+    builder!(sequential_pairings, bool);
+    builder!(signup_cap, u64);
+    builder!(check_in_duration, u64);
+    builder!(grand_finals_modifier, Option<String>);
 }
 
 /// Challonge `Tournament` definition.
@@ -171,18 +271,11 @@ pub struct Tournament {
     // <predictions-opened-at nil="true"/>
     pub private: bool,
     pub progress_meter: u64,
-    pub pts_for_bye: f64, //>1.0</pts-for-bye>
-    pub pts_for_game_tie: f64, //>0.0</pts-for-game-tie>
-    pub pts_for_game_win: f64, //>0.0</pts-for-game-win>
-    pub pts_for_match_tie: f64, //>0.5</pts-for-match-tie>
-    pub pts_for_match_win: f64, //>1.0</pts-for-match-win>
+    pub swiss_points: GamePoints,
     pub quick_advance: bool,
     // <ranked-by>match wins</ranked-by>
     pub require_score_agreement: bool,
-    pub rr_pts_for_game_tie: f64, // >0.0</rr-pts-for-game-tie>
-    pub rr_pts_for_game_win: f64, //>0.0</rr-pts-for-game-win>
-    pub rr_pts_for_match_tie: f64, //>0.5</rr-pts-for-match-tie>
-    pub rr_pts_for_match_win: f64, //>1.0</rr-pts-for-match-win>
+    pub round_robin_points: GamePoints,
     pub sequential_pairings: bool,
     pub show_rounds: bool,
     // <signup-cap nil="true"/>
@@ -249,17 +342,10 @@ impl Tournament {
             prediction_method: try!(remove(&mut tv, "prediction_method")).as_u64().unwrap_or(0),
             private: try!(remove(&mut tv, "private")).as_boolean().unwrap_or(false),
             progress_meter: try!(remove(&mut tv, "progress_meter")).as_u64().unwrap_or(0),
-            pts_for_bye: try!(remove(&mut tv, "pts_for_bye")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
-            pts_for_game_tie: try!(remove(&mut tv, "pts_for_game_tie")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
-            pts_for_game_win: try!(remove(&mut tv, "pts_for_game_win")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
-            pts_for_match_tie: try!(remove(&mut tv, "pts_for_match_tie")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
-            pts_for_match_win: try!(remove(&mut tv, "pts_for_match_win")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
+            swiss_points: GamePoints::decode(&mut tv, "").unwrap(),
             quick_advance: try!(remove(&mut tv, "quick_advance")).as_boolean().unwrap_or(false),
             require_score_agreement: try!(remove(&mut tv, "require_score_agreement")).as_boolean().unwrap_or(false),
-            rr_pts_for_game_tie: try!(remove(&mut tv, "rr_pts_for_game_tie")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
-            rr_pts_for_game_win: try!(remove(&mut tv, "rr_pts_for_game_win")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
-            rr_pts_for_match_tie: try!(remove(&mut tv, "rr_pts_for_match_tie")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
-            rr_pts_for_match_win: try!(remove(&mut tv, "rr_pts_for_match_win")).as_string().unwrap_or("").to_owned().parse::<f64>().unwrap_or(0.0f64),
+            round_robin_points: GamePoints::decode(&mut tv, "rr_").unwrap(),
             sequential_pairings: try!(remove(&mut tv, "sequential_pairings")).as_boolean().unwrap_or(false),
             show_rounds: try!(remove(&mut tv, "show_rounds")).as_boolean().unwrap_or(false),
             started_at: started_at,
@@ -315,18 +401,18 @@ pub enum TournamentType {
     Swiss
 }
 impl TournamentType {
-    pub fn to_get_param(&self) -> &'static str {
-        match self {
-            &TournamentType::SingleElimination => {
+    pub fn to_get_param<'a>(&self) -> &'a str {
+        match *self {
+            TournamentType::SingleElimination => {
                 "single_elimination"
             },
-            &TournamentType::DoubleElimination => {
+            TournamentType::DoubleElimination => {
                 "double_elimination"
             },
-            &TournamentType::RoundRobin => {
+            TournamentType::RoundRobin => {
                 "round_robin"
             },
-            &TournamentType::Swiss => {
+            TournamentType::Swiss => {
                 "swiss"
             },
         }
@@ -334,17 +420,17 @@ impl TournamentType {
 }
 impl fmt::Display for TournamentType {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &TournamentType::SingleElimination => {
+        match *self {
+            TournamentType::SingleElimination => {
                 try!(fmt.write_str("single elimination"));
             },
-            &TournamentType::DoubleElimination => {
+            TournamentType::DoubleElimination => {
                 try!(fmt.write_str("double elimination"));
             },
-            &TournamentType::RoundRobin => {
+            TournamentType::RoundRobin => {
                 try!(fmt.write_str("round robin"));
             },
-            &TournamentType::Swiss => {
+            TournamentType::Swiss => {
                 try!(fmt.write_str("swiss"));
             },
         }
@@ -377,17 +463,17 @@ pub enum TournamentState {
 }
 impl fmt::Display for TournamentState {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &TournamentState::All => {
+        match *self {
+            TournamentState::All => {
                 try!(fmt.write_str("all"));
             },
-            &TournamentState::Pending => {
+            TournamentState::Pending => {
                 try!(fmt.write_str("pending"));
             },
-            &TournamentState::InProgress => {
+            TournamentState::InProgress => {
                 try!(fmt.write_str("in_progress"));
             },
-            &TournamentState::Ended => {
+            TournamentState::Ended => {
                 try!(fmt.write_str("ended"));
             },
         }
@@ -499,17 +585,17 @@ mod tests {
             assert_eq!(t.prediction_method, 0);
             assert_eq!(t.private, false);
             assert_eq!(t.progress_meter, 0);
-            assert_eq!(t.pts_for_bye, 1.0f64);
-            assert_eq!(t.pts_for_game_tie, 0.0f64);
-            assert_eq!(t.pts_for_game_win, 0.0f64);
-            assert_eq!(t.pts_for_match_tie, 0.5f64);
-            assert_eq!(t.pts_for_match_win, 1.0f64);
+            assert_eq!(t.swiss_points.bye, Some(1.0f64));
+            assert_eq!(t.swiss_points.game_tie, 0.0f64);
+            assert_eq!(t.swiss_points.game_win, 0.0f64);
+            assert_eq!(t.swiss_points.match_tie, 0.5f64);
+            assert_eq!(t.swiss_points.match_win, 1.0f64);
             assert_eq!(t.quick_advance, false);
             assert_eq!(t.require_score_agreement, false);
-            assert_eq!(t.rr_pts_for_game_tie, 0.0f64);
-            assert_eq!(t.rr_pts_for_game_win, 0.0f64);
-            assert_eq!(t.rr_pts_for_match_tie, 0.5f64);
-            assert_eq!(t.rr_pts_for_match_win, 1.0f64);
+            assert_eq!(t.round_robin_points.game_tie, 0.0f64);
+            assert_eq!(t.round_robin_points.game_win, 0.0f64);
+            assert_eq!(t.round_robin_points.match_tie, 0.5f64);
+            assert_eq!(t.round_robin_points.match_win, 1.0f64);
             assert_eq!(t.sequential_pairings, false);
             assert_eq!(t.show_rounds, true);
             // assert_eq!(t.started_at, DateTime<);

@@ -90,17 +90,17 @@ pub enum MatchState {
 }
 impl fmt::Display for MatchState {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &MatchState::All => {
+        match *self {
+            MatchState::All => {
                 try!(fmt.write_str("all"));
             },
-            &MatchState::Pending => {
+            MatchState::Pending => {
                 try!(fmt.write_str("pending"));
             },
-            &MatchState::Open => {
+            MatchState::Open => {
                 try!(fmt.write_str("open"));
             },
-            &MatchState::Complete => {
+            MatchState::Complete => {
                 try!(fmt.write_str("complete"));
             },
         }
@@ -155,6 +155,21 @@ pub struct MatchUpdate {
 
     /// Overwrites the number of votes for player 2
     pub player2_votes: Option<u64>,
+}
+impl MatchUpdate {
+    pub fn new() -> MatchUpdate {
+        MatchUpdate {
+            scores_csv: String::default(),
+            winner_id: None,
+            player1_votes: None,
+            player2_votes: None,
+        }
+    }
+
+    builder_s!(scores_csv);
+    builder_o!(winner_id, ParticipantId);
+    builder_o!(player1_votes, u64);
+    builder_o!(player2_votes, u64);
 }
 
 /// Challonge `Match` definition.
@@ -325,15 +340,17 @@ mod tests {
             // assert_eq!(m.updated_at, );
             assert_eq!(m.winner_id, None);
             assert!(m.prerequisite_match_ids_csv.is_empty());
-            let correct_scores = vec![
-                MatchScore(3, 1),
-                MatchScore(3, 2),
-            ];
-            assert_eq!(m.scores_csv.scores.len(), 2);
-            let mut iter = m.scores_csv.scores.iter().zip(correct_scores.iter());
-            while let Some(pair) = iter.next() {
-                assert_eq!((pair.0).0, (pair.1).0);
-                assert_eq!((pair.1).1, (pair.1).1);
+            {
+                let correct_scores = vec![
+                    MatchScore(3, 1),
+                    MatchScore(3, 2),
+                ];
+                assert_eq!(m.scores_csv.scores.len(), 2);
+                let mut iter = m.scores_csv.scores.iter().zip(correct_scores.iter());
+                while let Some(pair) = iter.next() {
+                    assert_eq!((pair.0).0, (pair.1).0);
+                    assert_eq!((pair.1).1, (pair.1).1);
+                }
             }
         } else {
             assert!(false);

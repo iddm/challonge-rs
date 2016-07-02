@@ -46,6 +46,23 @@ pub struct ParticipantCreate {
     /// Max: 255 characters. Multi-purpose field that is only visible via the API and handy for site integration (e.g. key to your users table). 
     pub misc: String,
 }
+impl ParticipantCreate {
+    pub fn new() -> ParticipantCreate {
+        ParticipantCreate {
+            name: None,
+            challonge_username: None,
+            email: String::default(),
+            seed: 1,
+            misc: String::default(),
+        }
+    }
+
+    builder_so!(name);
+    builder_so!(challonge_username);
+    builder_s!(email);
+    builder!(seed, u64);
+    builder_s!(misc);
+}
 
 /// A list of participants for the tournament. 
 #[allow(dead_code)]

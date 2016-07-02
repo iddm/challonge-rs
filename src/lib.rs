@@ -16,32 +16,36 @@ extern crate chrono;
 
 use chrono::date::Date;
 use chrono::offset::local::Local;
+#[macro_use]
+mod macroses;
 pub mod tournament;
 pub mod participants;
 pub mod error;
 pub mod matches;
-use tournament::{
+pub use tournament::{
     Tournament,
     TournamentId,
     TournamentCreate,
     TournamentState,
     TournamentType,
+    TournamentIncludes,
     Index as TournamentIndex,
 };
-use participants::{
+pub use participants::{
     Participant,
-    Index as ParticipantIndex,
     ParticipantCreate,
     ParticipantId,
+    Index as ParticipantIndex,
 };
-use matches::{
+pub use matches::{
     Match,
     MatchState,
     MatchUpdate,
-    Index as MatchIndex,
     MatchId,
+    Index as MatchIndex,
 };
 use error::Error;
+
 
 const API_BASE: &'static str = "https://api.challonge.com/v1";
 
@@ -80,31 +84,10 @@ fn make_headers(user_name: String, api_key: String) -> hyper::header::Headers {
     headers
 }
 
-macro_rules! format_date {
-    ($date:expr) => {
-        $date.format("%Y-%m-%d").to_string()
-    }
-}
 
-macro_rules! t {
-    ($key:expr) => {
-        concat!("tournament[", $key, "]")
-    }
-}
+type FieldPairs = Vec<(&'static str, String)>;
 
-macro_rules! p {
-    ($key:expr) => {
-        concat!("participant[", $key, "]")
-    }
-}
-
-macro_rules! m {
-    ($key:expr) => {
-        concat!("match[", $key, "]")
-    }
-}
-
-fn pairs_to_string(params: Vec<(&'static str, String)>) -> String {
+fn pairs_to_string(params: FieldPairs) -> String {
     let mut body = String::new();
     let mut sep = "";
     for p in params {
@@ -115,56 +98,62 @@ fn pairs_to_string(params: Vec<(&'static str, String)>) -> String {
     body
 }
 
-fn pc_to_pairs(participant: ParticipantCreate) -> Vec<(&'static str, String)>{
+fn pc_to_pairs(participant: &ParticipantCreate) -> FieldPairs {
     let mut params = vec![
-        (p!("email"), participant.email),
+        (p!("email"), participant.email.clone()),
         (p!("seed"), participant.seed.to_string()),
-        (p!("misc"), participant.misc),
+        (p!("misc"), participant.misc.clone()),
     ];
    
-    if let Some(n) = participant.name {
-        params.push((p!("name"), n));
+    if let Some(n) = participant.name.as_ref() {
+        params.push((p!("name"), n.clone()));
     }
-    if let Some(un) = participant.challonge_username {
-        params.push((p!("challonge_username"), un));
+    if let Some(un) = participant.challonge_username.as_ref() {
+        params.push((p!("challonge_username"), un.clone()));
     }
     params
 }
-fn tc_to_pairs(tournament: TournamentCreate) -> Vec<(&'static str, String)>{
-    let mut params: Vec<(&'static str, String)> = vec![
-        (t!("name"), tournament.name),
+
+fn tc_to_pairs(tournament: &TournamentCreate) -> FieldPairs { 
+    let mut params = vec![
+        (t!("name"), tournament.name.clone()),
         (t!("tournament_type"), tournament.tournament_type.to_string()),
-        (t!("url"), tournament.url),
-        (t!("subdomain"), tournament.subdomain),
-        (t!("description"), tournament.description),
+        (t!("url"), tournament.url.clone()),
+        (t!("subdomain"), tournament.subdomain.clone()),
+        (t!("description"), tournament.description.clone()),
         (t!("open_signup"), tournament.open_signup.to_string()),
         (t!("hold_third_place_match"), tournament.hold_third_place_match.to_string()),
-        (t!("pts_for_match_win"), tournament.pts_for_match_win.to_string()),
-        (t!("pts_for_match_tie"), tournament.pts_for_match_tie.to_string()),
-        (t!("pts_for_game_win"), tournament.pts_for_game_win.to_string()),
-        (t!("pts_for_game_tie"), tournament.pts_for_game_tie.to_string()),
-        (t!("pts_for_bye"), tournament.pts_for_bye.to_string()),
+        (t!("pts_for_match_win"), tournament.swiss_points.match_win.to_string()),
+        (t!("pts_for_match_tie"), tournament.swiss_points.match_tie.to_string()),
+        (t!("pts_for_game_win"), tournament.swiss_points.game_win.to_string()),
+        (t!("pts_for_game_tie"), tournament.swiss_points.game_tie.to_string()),
         (t!("swiss_rounds"), tournament.swiss_rounds.to_string()),
         (t!("ranked_by"), tournament.ranked_by.to_string()),
-        (t!("rr_pts_for_match_win"), tournament.rr_pts_for_match_win.to_string()),
-        (t!("rr_pts_for_match_tie"), tournament.rr_pts_for_match_tie.to_string()),
-        (t!("rr_pts_for_game_win"), tournament.rr_pts_for_game_win.to_string()),
-        (t!("rr_pts_for_game_tie"), tournament.rr_pts_for_game_tie.to_string()),
+        (t!("rr_pts_for_match_win"), tournament.round_robin_points.match_win.to_string()),
+        (t!("rr_pts_for_match_tie"), tournament.round_robin_points.match_tie.to_string()),
+        (t!("rr_pts_for_game_win"), tournament.round_robin_points.game_win.to_string()),
+        (t!("rr_pts_for_game_tie"), tournament.round_robin_points.game_tie.to_string()),
         (t!("show_rounds"), tournament.show_rounds.to_string()),
         (t!("private"), tournament.private.to_string()),
         (t!("notify_users_when_matches_open"), tournament.notify_users_when_matches_open.to_string()),
         (t!("notify_users_when_the_tournament_ends"), tournament.notify_users_when_the_tournament_ends.to_string()),
         (t!("sequential_pairings"), tournament.sequential_pairings.to_string()),
         (t!("signup_cap"), tournament.signup_cap.to_string()),
-        (t!("start_at"), tournament.start_at.to_rfc3339()),
         (t!("check_in_duration"), tournament.check_in_duration.to_string()),
     ];
-    if let Some(gfm) = tournament.grand_finals_modifier {
-        params.push((t!("grand_finals_modifier"), gfm));
+    if let Some(gfm) = tournament.grand_finals_modifier.as_ref() {
+        params.push((t!("grand_finals_modifier"), gfm.clone()));
+    }
+    if let Some(start_at) = tournament.start_at.as_ref() {
+        params.push((t!("start_at"), start_at.to_rfc3339()));
+    }
+    if let Some(s_bye_pts) = tournament.swiss_points.bye.as_ref() {
+        params.push((t!("pts_for_bye"), s_bye_pts.to_string()));
     }
     params
 }
-fn mu_to_pairs(mu: MatchUpdate) -> Vec<(&'static str, String)>{
+
+fn mu_to_pairs(mu: &MatchUpdate) -> FieldPairs {
     let mut params = Vec::new();
     
     if let Some(v) = mu.player1_votes {
@@ -174,9 +163,9 @@ fn mu_to_pairs(mu: MatchUpdate) -> Vec<(&'static str, String)>{
         params.push((m!("player2_votes"), v.to_string()));
     }
     if !mu.scores_csv.is_empty() {
-        params.push((m!("scores_csv"), mu.scores_csv));
+        params.push((m!("scores_csv"), mu.scores_csv.clone()));
     }
-    if let Some(w) = mu.winner_id {
+    if let Some(w) = mu.winner_id.as_ref() {
         params.push((m!("winner_id"), w.0.to_string()));
     }
     params
@@ -197,10 +186,10 @@ impl Challonge {
     ///
     /// let c = Challonge::new("myusername", "myapikey");
     /// ```
-    pub fn new(user_name: &str, api_key: &str) -> Challonge {
+    pub fn new<S: Into<String>>(user_name: S, api_key: S) -> Challonge {
         Challonge {
             client: hyper::Client::new(),
-            headers: make_headers(user_name.to_owned(), api_key.to_owned()),
+            headers: make_headers(user_name.into(), api_key.into()),
         }
     }
 
@@ -249,17 +238,15 @@ impl Challonge {
     /// use challonge::Challonge;
     ///
     /// let c = Challonge::new("myusername", "myapikey");
-    /// let t = c.get_tournament(&TournamentId::Id(2669881), true, true);
+    /// let i = TournamentIncludes::Matches;
+    /// let t = c.get_tournament(&TournamentId::Id(2669881), &i);
     /// ```
     pub fn get_tournament(&self,
                           id: &TournamentId,
-                          include_participants: bool,
-                          include_matches: bool) -> Result<Tournament, Error> {
+                          includes: &TournamentIncludes) -> Result<Tournament, Error> {
         let mut url = hyper::Url::parse(&format!("{}/tournaments/{}.json", API_BASE, id.to_string())).unwrap();
-        url.query_pairs_mut()
-            .append_pair("include_participants", &(include_participants as i64).to_string())
-            .append_pair("include_matches", &(include_matches as i64).to_string());
-        
+
+        Challonge::add_tournament_includes(&mut url, includes);
         let response = try!(retry(|| self.client.get(url.as_str())
                                         .headers(self.headers.clone())));
         Tournament::decode(try!(serde_json::from_reader(response)))
@@ -274,7 +261,7 @@ impl Challonge {
     /// use challonge::tournament::TournamentCreate;
     ///
     /// let c = Challonge::new("myusername", "myapikey");
-    /// let tc = TournamentCreate {
+    /// let tc = TournamentCreate { // explicitly define the whole structure
     ///            name: "Tester".to_owned(),
     ///            tournament_type: TournamentType::SingleElimination,
     ///            url: "testerurl".to_owned(),
@@ -303,10 +290,17 @@ impl Challonge {
     ///            check_in_duration: 60,
     ///            grand_finals_modifier: None,
     /// };
-    /// let t = c.create_tournament(tc.clone());
-    /// assert!(t.is_ok());
+    /// let t = c.create_tournament(&tc);
+    /// // or you may create `TournamentCreate` by using a builder:
+    /// let mut tcb = TournamentCreate::new();
+    /// tcb.name("Test tournament")
+    ///   .tournament_type(TournamentType::SingleElimination)
+    ///   .url("TestUrl")
+    ///   .subdomain("subdomain")
+    ///   .description("TEST TOURNAMENT created by challonge-rs");
+    /// let tb = c.create_tournament(&tcb);
     /// ```
-    pub fn create_tournament(&self, tournament: TournamentCreate) -> Result<Tournament, Error> {
+    pub fn create_tournament(&self, tournament: &TournamentCreate) -> Result<Tournament, Error> {
         let url = &format!("{}/tournaments.json", API_BASE);
         let body = pairs_to_string(tc_to_pairs(tournament));
         let response = try!(retry(|| self.client.post(url)
@@ -317,8 +311,8 @@ impl Challonge {
     
     /// Update a tournament's attributes. 
     pub fn update_tournament(&self,
-                             id: TournamentId,
-                             tournament: TournamentCreate) -> Result<Tournament, Error> {
+                             id: &TournamentId,
+                             tournament: &TournamentCreate) -> Result<Tournament, Error> {
         let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
         let body = pairs_to_string(tc_to_pairs(tournament));
         let response = try!(retry(|| self.client.put(url)
@@ -328,7 +322,7 @@ impl Challonge {
     }
 
     /// Deletes a tournament along with all its associated records. There is no undo, so use with care! 
-    pub fn delete_tournament(&self, id: TournamentId) -> Result<(), Error> {
+    pub fn delete_tournament(&self, id: &TournamentId) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
         let _ = try!(retry(|| self.client.delete(url).headers(self.headers.clone())));
         Ok(())
@@ -342,10 +336,9 @@ impl Challonge {
     ///
     /// NOTE: Checked in participants on the waiting list will be promoted if slots become available.
     pub fn tournament_process_checkins(&self,
-                                       id: TournamentId,
-                                       include_participants: bool,
-                                       include_matches: bool) -> Result<(), Error> {
-        self.tournament_action("process_check_ins", id, include_participants, include_matches)
+                                       id: &TournamentId,
+                                       includes: &TournamentIncludes) -> Result<(), Error> {
+        self.tournament_action("process_check_ins", id, includes)
     }
 
     /// When your tournament is in a 'checking_in' or 'checked_in' state, there's no way to edit the tournament's start time (start_at) or check-in duration (check_in_duration). You must first abort check-in, then you may edit those attributes.
@@ -353,39 +346,35 @@ impl Challonge {
     /// 1. Makes all participants active and clears their checked_in_at times.
     /// 2. Transitions the tournament state from 'checking_in' or 'checked_in' to 'pending'
     pub fn tournament_abort_checkins(&self,
-                                     id: TournamentId,
-                                     include_participants: bool,
-                                     include_matches: bool) -> Result<(), Error> {
-        self.tournament_action("abort_check_in", id, include_participants, include_matches)
+                                     id: &TournamentId,
+                                     includes: &TournamentIncludes) -> Result<(), Error> {
+        self.tournament_action("abort_check_in", id, includes)
     }
 
     /// Start a tournament, opening up first round matches for score reporting. The tournament must have at least 2 participants. 
     pub fn tournament_start(&self,
-                            id: TournamentId,
-                            include_participants: bool,
-                            include_matches: bool) -> Result<(), Error> {
-        self.tournament_action("start", id, include_participants, include_matches)
+                            id: &TournamentId,
+                            includes: &TournamentIncludes) -> Result<(), Error> {
+        self.tournament_action("start", id, includes)
     }
     
     /// Finalize a tournament that has had all match scores submitted, rendering its results permanent. 
     pub fn tournament_finalize(&self,
-                               id: TournamentId,
-                               include_participants: bool,
-                               include_matches: bool) -> Result<(), Error> {
-        self.tournament_action("finalize", id, include_participants, include_matches)
+                               id: &TournamentId,
+                               includes: &TournamentIncludes) -> Result<(), Error> {
+        self.tournament_action("finalize", id, includes)
     }
 
     /// Reset a tournament, clearing all of its scores and attachments. You can then add/remove/edit participants before starting the tournament again. 
     pub fn tournament_reset(&self,
-                            id: TournamentId,
-                            include_participants: bool,
-                            include_matches: bool) -> Result<(), Error> {
-        self.tournament_action("reset", id, include_participants, include_matches)
+                            id: &TournamentId,
+                            includes: &TournamentIncludes) -> Result<(), Error> {
+        self.tournament_action("reset", id, includes)
     }
 
     /// Retrieve a tournament's participant list. 
     pub fn participant_index(&self,
-                             id: TournamentId) -> Result<ParticipantIndex, Error> {
+                             id: &TournamentId) -> Result<ParticipantIndex, Error> {
         let url = &format!("{}/tournaments/{}/participants.json",
                            API_BASE,
                            id.to_string());
@@ -396,8 +385,8 @@ impl Challonge {
     
     /// Add a participant to a tournament (up until it is started). 
     pub fn create_participant(&self,
-                              id: TournamentId,
-                              participant: ParticipantCreate) -> Result<Participant, Error> {
+                              id: &TournamentId,
+                              participant: &ParticipantCreate) -> Result<Participant, Error> {
         let url = &format!("{}/tournaments/{}/participants.json",
                            API_BASE,
                            id.to_string());
@@ -417,8 +406,8 @@ impl Challonge {
     
     /// Retrieve a single participant record for a tournament.
     pub fn get_participant(&self,
-                           id: TournamentId,
-                           participant_id: ParticipantId,
+                           id: &TournamentId,
+                           participant_id: &ParticipantId,
                            include_matches: bool) -> Result<Participant, Error> {
         let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/participants/{}.json",
                                                  API_BASE,
@@ -434,9 +423,9 @@ impl Challonge {
 
     /// Update the attributes of a tournament participant. 
     pub fn update_participant(&self,
-                              id: TournamentId,
-                              participant_id: ParticipantId,
-                              participant: ParticipantCreate) -> Result<(), Error> {
+                              id: &TournamentId,
+                              participant_id: &ParticipantId,
+                              participant: &ParticipantCreate) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}/participants/{}.json",
                            API_BASE,
                            id.to_string(),
@@ -450,8 +439,8 @@ impl Challonge {
 
     /// Checks a participant in, setting checked_in_at to the current time. 
     pub fn check_in_participant(&self,
-                                id: TournamentId,
-                                participant_id: ParticipantId) -> Result<(), Error> {
+                                id: &TournamentId,
+                                participant_id: &ParticipantId) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}/participants/{}/check_in.json",
                            API_BASE,
                            id.to_string(),
@@ -464,8 +453,8 @@ impl Challonge {
 
     /// Marks a participant as having not checked in, setting checked_in_at to nil. 
     pub fn undo_check_in_participant(&self,
-                                     id: TournamentId,
-                                     participant_id: ParticipantId) -> Result<(), Error> {
+                                     id: &TournamentId,
+                                     participant_id: &ParticipantId) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}/participants/{}/undo_check_in.json",
                            API_BASE,
                            id.to_string(),
@@ -478,8 +467,8 @@ impl Challonge {
     /// If the tournament has not started, delete a participant, automatically filling in the abandoned seed number.
     /// If tournament is underway, mark a participant inactive, automatically forfeiting his/her remaining matches. 
     pub fn delete_participant(&self,
-                              id: TournamentId,
-                              participant_id: ParticipantId) -> Result<(), Error> {
+                              id: &TournamentId,
+                              participant_id: &ParticipantId) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}/participants/{}.json",
                            API_BASE,
                            id.to_string(),
@@ -491,7 +480,7 @@ impl Challonge {
 
     /// Randomize seeds among participants. Only applicable before a tournament has started. 
     pub fn randomize_participants(&self,
-                                  id: TournamentId) -> Result<(), Error> {
+                                  id: &TournamentId) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}/participants/randomize.json",
                            API_BASE,
                            id.to_string());
@@ -502,7 +491,7 @@ impl Challonge {
 
     /// Retrieve a tournament's match list. 
     pub fn match_index(&self,
-                       id: TournamentId,
+                       id: &TournamentId,
                        state: Option<MatchState>,
                        participant_id: Option<ParticipantId>) -> Result<MatchIndex, Error> {
         let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/matches.json",
@@ -524,8 +513,8 @@ impl Challonge {
 
     /// Retrieve a single match record for a tournament. 
     pub fn get_match(&self,
-                     id: TournamentId,
-                     match_id: MatchId,
+                     id: &TournamentId,
+                     match_id: &MatchId,
                      include_attachments: bool) -> Result<Match, Error> {
         let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/matches/{}.json",
                                                  API_BASE,
@@ -540,9 +529,9 @@ impl Challonge {
     
     /// Update/submit the score(s) for a match.
     pub fn update_match(&self,
-                        id: TournamentId,
-                        match_id: MatchId,
-                        match_update: MatchUpdate) -> Result<Match, Error> {
+                        id: &TournamentId,
+                        match_id: &MatchId,
+                        match_update: &MatchUpdate) -> Result<Match, Error> {
         let url = &format!("{}/tournaments/{}/matches/{}.json",
                            API_BASE,
                            id.to_string(),
@@ -562,18 +551,38 @@ impl Challonge {
 
     fn tournament_action(&self,
                          endpoint: &str,
-                         id: TournamentId,
-                         include_participants: bool,
-                         include_matches: bool) -> Result<(), Error> {
+                         id: &TournamentId,
+                         includes: &TournamentIncludes) -> Result<(), Error> {
         let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/{}.json",
                                                  API_BASE,
                                                  id.to_string(),
                                                  endpoint)).unwrap();
-        url.query_pairs_mut()
-            .append_pair("include_participants", &(include_participants as i64).to_string())
-            .append_pair("include_matches", &(include_matches as i64).to_string());
+        Challonge::add_tournament_includes(&mut url, includes);
         let _ = try!(retry(|| self.client.post(url.as_str()).headers(self.headers.clone())));
         Ok(())
+    }
+
+    // TODO refactor to be better
+    fn add_tournament_includes(url: &mut hyper::Url, includes: &TournamentIncludes) {
+        let mut pairs = url.query_pairs_mut();
+        match includes {
+            &TournamentIncludes::All => {
+                pairs
+                    .append_pair("include_participants", "1")
+                    .append_pair("include_matches", "1");
+            },
+            &TournamentIncludes::Matches => {
+                pairs
+                    .append_pair("include_participants", "0")
+                    .append_pair("include_matches", "1");
+            },
+            &TournamentIncludes::Participants => {
+                pairs
+                    .append_pair("include_participants", "1")
+                    .append_pair("include_matches", "0");
+            },
+        }
+
     }
 
     // fn prepare<'a>(&self, url: &str) -> hyper::client::RequestBuilder<'a> {
