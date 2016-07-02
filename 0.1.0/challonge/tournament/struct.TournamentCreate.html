@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `TournamentCreate` struct in crate `challonge`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, TournamentCreate">
+
+    <title>challonge::tournament::TournamentCreate - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>challonge</a>::<wbr><a href='index.html'>tournament</a></p><script>window.sidebarCurrent = {name: 'TournamentCreate', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>challonge</a>::<wbr><a href='index.html'>tournament</a>::<wbr><a class='struct' href=''>TournamentCreate</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-116' class='srclink' href='../../src/challonge/src/tournament.rs.html#79-143' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct TournamentCreate {
+    pub name: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub tournament_type: <a class='enum' href='../../challonge/tournament/enum.TournamentType.html' title='challonge::tournament::TournamentType'>TournamentType</a>,
+    pub url: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub subdomain: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub description: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub open_signup: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub hold_third_place_match: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub pts_for_match_win: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub pts_for_match_tie: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub pts_for_game_win: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub pts_for_game_tie: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub pts_for_bye: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub swiss_rounds: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>,
+    pub ranked_by: <a class='enum' href='../../challonge/tournament/enum.RankedBy.html' title='challonge::tournament::RankedBy'>RankedBy</a>,
+    pub rr_pts_for_match_win: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub rr_pts_for_match_tie: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub rr_pts_for_game_win: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub rr_pts_for_game_tie: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
+    pub show_rounds: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub private: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub notify_users_when_matches_open: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub notify_users_when_the_tournament_ends: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub sequential_pairings: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub signup_cap: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>,
+    pub start_at: <a class='struct' href='../../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../../chrono/offset/utc/struct.UTC.html' title='chrono::offset::utc::UTC'>UTC</a>&gt;,
+    pub check_in_duration: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>,
+    pub grand_finals_modifier: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+}</pre><div class='docblock'><p>Structure for creating a tournament.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                             <td id='structfield.name'><code>name</code></td><td><div class='docblock'><p>Your event&#39;s name/title (Max: 60 characters)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.tournament_type'><code>tournament_type</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.url'><code>url</code></td><td><div class='docblock'><p>challonge.com/url (letters, numbers, and underscores only)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.subdomain'><code>subdomain</code></td><td><div class='docblock'><p>subdomain.challonge.com/url (Requires write access to the specified subdomain)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.description'><code>description</code></td><td><div class='docblock'><p>Description/instructions to be displayed above the bracket</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.open_signup'><code>open_signup</code></td><td><div class='docblock'><p>Have Challonge host a sign-up page (otherwise, you manually add all participants)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.hold_third_place_match'><code>hold_third_place_match</code></td><td><div class='docblock'><p>Single Elimination only</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.pts_for_match_win'><code>pts_for_match_win</code></td><td><div class='docblock'><p>Only for Swiss system</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.pts_for_match_tie'><code>pts_for_match_tie</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.pts_for_game_win'><code>pts_for_game_win</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.pts_for_game_tie'><code>pts_for_game_tie</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.pts_for_bye'><code>pts_for_bye</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.swiss_rounds'><code>swiss_rounds</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.ranked_by'><code>ranked_by</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.rr_pts_for_match_win'><code>rr_pts_for_match_win</code></td><td><div class='docblock'><p>Only for Round Robin system</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.rr_pts_for_match_tie'><code>rr_pts_for_match_tie</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.rr_pts_for_game_win'><code>rr_pts_for_game_win</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.rr_pts_for_game_tie'><code>rr_pts_for_game_tie</code></td><td></td></tr><tr class='stab '>
+                             <td id='structfield.show_rounds'><code>show_rounds</code></td><td><div class='docblock'><p>Single &amp; Double Elimination only - Label each round above the bracket (default: false)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.private'><code>private</code></td><td><div class='docblock'><p>Hide this tournament from the public browsable index and your profile (default: false)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.notify_users_when_matches_open'><code>notify_users_when_matches_open</code></td><td><div class='docblock'><p>Email registered Challonge participants when matches open up for them (default: false)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.notify_users_when_the_tournament_ends'><code>notify_users_when_the_tournament_ends</code></td><td><div class='docblock'><p>Email registered Challonge participants the results when this tournament ends (default: false)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.sequential_pairings'><code>sequential_pairings</code></td><td><div class='docblock'><p>Instead of traditional seeding rules, make pairings by going straight down the list of participants.
+First round matches are filled in top to bottom, then qualifying matches (if applicable). (default: false)</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.signup_cap'><code>signup_cap</code></td><td><div class='docblock'><p>Maximum number of participants in the bracket.
+A waiting list (attribute on Participant) will capture participants once the cap is reached.</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.start_at'><code>start_at</code></td><td><div class='docblock'><p>the planned or anticipated start time for the tournament (Used with check_in_duration to determine participant check-in window). Timezone defaults to Eastern.</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.check_in_duration'><code>check_in_duration</code></td><td><div class='docblock'><p>Length of the participant check-in window in minutes.</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.grand_finals_modifier'><code>grand_finals_modifier</code></td><td><div class='docblock'><p>This option only affects double elimination. null/blank (default) - give the winners bracket finalist two chances to beat the losers bracket finalist, &#39;single match&#39; - create only one grand finals match, &#39;skip&#39; - don&#39;t create a finals match between winners and losers bracket finalists</p>
+</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "challonge";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
