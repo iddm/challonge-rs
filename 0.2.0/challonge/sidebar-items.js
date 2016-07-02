@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["error","Challonge REST API error type."],["matches","Challonge Match type."],["participants","Challonge Participant type."],["tournament","Challonge Tournament type."]],"struct":[["Challonge","Client for the Challonge REST API."]]});

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Challonge` struct in crate `challonge`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Challonge">
+
+    <title>challonge::Challonge - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>challonge</a></p><script>window.sidebarCurrent = {name: 'Challonge', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>challonge</a>::<wbr><a class='struct' href=''>Challonge</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1376' class='srclink' href='../src/challonge/src/lib.rs.html#195-198' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Challonge {
+    // some fields omitted
+}</pre><div class='docblock'><p>Client for the Challonge REST API.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../challonge/struct.Challonge.html' title='challonge::Challonge'>Challonge</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>&lt;S: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;(user_name: S, api_key: S) -&gt; <a class='struct' href='../challonge/struct.Challonge.html' title='challonge::Challonge'>Challonge</a></code></h4>
+<div class='docblock'><p>Create new connection to Challonge.</p>
+
+<h1 id='example' class='section-header'><a href='#example'>Example</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>challonge</span>;
+
+<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>challonge</span>::<span class='ident'>Challonge</span>;
+
+<span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Challonge</span>::<span class='ident'>new</span>(<span class='string'>&quot;myusername&quot;</span>, <span class='string'>&quot;myapikey&quot;</span>);</pre>
+</div><h4 id='method.tournament_index' class='method'><code>fn <a href='#method.tournament_index' class='fnname'>tournament_index</a>(&amp;self, state: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentState.html' title='challonge::tournament::TournamentState'>TournamentState</a>, tournament_type: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentType.html' title='challonge::tournament::TournamentType'>TournamentType</a>, created_after: &amp;<a class='struct' href='../chrono/date/struct.Date.html' title='chrono::date::Date'>Date</a>&lt;<a class='struct' href='../chrono/offset/local/struct.Local.html' title='chrono::offset::local::Local'>Local</a>&gt;, created_before: &amp;<a class='struct' href='../chrono/date/struct.Date.html' title='chrono::date::Date'>Date</a>&lt;<a class='struct' href='../chrono/offset/local/struct.Local.html' title='chrono::offset::local::Local'>Local</a>&gt;, subdomain: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/tournament/struct.Index.html' title='challonge::tournament::Index'>TournamentIndex</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Retrieve a set of tournaments created with your account.</p>
+
+<h1 id='example-1' class='section-header'><a href='#example-1'>Example</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>challonge</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>chrono</span>;
+
+<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>challonge</span>::<span class='ident'>Challonge</span>;
+<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>challonge</span>::<span class='ident'>tournament</span>::{ <span class='ident'>TournamentState</span>, <span class='ident'>TournamentType</span> };
+<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>chrono</span>::<span class='op'>*</span>;
+
+<span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Challonge</span>::<span class='ident'>new</span>(<span class='string'>&quot;myusername&quot;</span>, <span class='string'>&quot;myapikey&quot;</span>);
+<span class='kw'>let</span> <span class='ident'>index</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>tournament_index</span> (
+       <span class='kw-2'>&amp;</span><span class='ident'>TournamentState</span>::<span class='ident'>All</span>,
+       <span class='kw-2'>&amp;</span><span class='ident'>TournamentType</span>::<span class='ident'>DoubleElimination</span>,
+       <span class='kw-2'>&amp;</span><span class='ident'>Local</span>::<span class='ident'>today</span>(),
+       <span class='kw-2'>&amp;</span><span class='ident'>Local</span>::<span class='ident'>today</span>(),
+       <span class='string'>&quot;subdomain&quot;</span>
+);</pre>
+</div><h4 id='method.get_tournament' class='method'><code>fn <a href='#method.get_tournament' class='fnname'>get_tournament</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, includes: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentIncludes.html' title='challonge::tournament::TournamentIncludes'>TournamentIncludes</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/tournament/struct.Tournament.html' title='challonge::tournament::Tournament'>Tournament</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Retrieve a single tournament record created with your account.</p>
+
+<h1 id='example-2' class='section-header'><a href='#example-2'>Example</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>challonge</span>;
+
+<span class='kw'>use</span> <span class='ident'>challonge</span>::<span class='ident'>Challonge</span>;
+
+<span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Challonge</span>::<span class='ident'>new</span>(<span class='string'>&quot;myusername&quot;</span>, <span class='string'>&quot;myapikey&quot;</span>);
+<span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>TournamentIncludes</span>::<span class='ident'>Matches</span>;
+<span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>get_tournament</span>(<span class='kw-2'>&amp;</span><span class='ident'>TournamentId</span>::<span class='ident'>Id</span>(<span class='number'>2669881</span>), <span class='ident'>i</span>);</pre>
+</div><h4 id='method.create_tournament' class='method'><code>fn <a href='#method.create_tournament' class='fnname'>create_tournament</a>(&amp;self, tournament: &amp;<a class='struct' href='../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/tournament/struct.Tournament.html' title='challonge::tournament::Tournament'>Tournament</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Create a new tournament.</p>
+
+<h1 id='example-3' class='section-header'><a href='#example-3'>Example</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>challonge</span>;
+
+<span class='kw'>use</span> <span class='ident'>challonge</span>::<span class='ident'>Challonge</span>;
+<span class='kw'>use</span> <span class='ident'>challonge</span>::<span class='ident'>tournament</span>::<span class='ident'>TournamentCreate</span>;
+
+<span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Challonge</span>::<span class='ident'>new</span>(<span class='string'>&quot;myusername&quot;</span>, <span class='string'>&quot;myapikey&quot;</span>);
+<span class='kw'>let</span> <span class='ident'>tc</span> <span class='op'>=</span> <span class='ident'>TournamentCreate</span> {
+           <span class='ident'>name</span>: <span class='string'>&quot;Tester&quot;</span>.<span class='ident'>to_owned</span>(),
+           <span class='ident'>tournament_type</span>: <span class='ident'>TournamentType</span>::<span class='ident'>SingleElimination</span>,
+           <span class='ident'>url</span>: <span class='string'>&quot;testerurl&quot;</span>.<span class='ident'>to_owned</span>(),
+           <span class='ident'>subdomain</span>: <span class='string'>&quot;subdomain&quot;</span>.<span class='ident'>to_owned</span>(),
+           <span class='ident'>description</span>: <span class='string'>&quot;Test tournament created from challonge-rs&quot;</span>.<span class='ident'>to_owned</span>(),
+           <span class='ident'>open_signup</span>: <span class='boolval'>false</span>,
+           <span class='ident'>hold_third_place_match</span>: <span class='boolval'>false</span>,
+           <span class='ident'>pts_for_match_win</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>pts_for_match_tie</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>pts_for_game_win</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>pts_for_game_tie</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>pts_for_bye</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>swiss_rounds</span>: <span class='number'>0</span>,
+           <span class='ident'>ranked_by</span>: <span class='ident'>RankedBy</span>::<span class='ident'>PointsScored</span>,
+           <span class='ident'>rr_pts_for_match_win</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>rr_pts_for_match_tie</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>rr_pts_for_game_win</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>rr_pts_for_game_tie</span>: <span class='number'>0.0f64</span>,
+           <span class='ident'>show_rounds</span>: <span class='boolval'>false</span>,
+           <span class='ident'>private</span>: <span class='boolval'>false</span>,
+           <span class='ident'>notify_users_when_matches_open</span>: <span class='boolval'>true</span>,
+           <span class='ident'>notify_users_when_the_tournament_ends</span>: <span class='boolval'>true</span>,
+           <span class='ident'>sequential_pairings</span>: <span class='boolval'>false</span>,
+           <span class='ident'>signup_cap</span>: <span class='number'>4</span>,
+           <span class='ident'>start_at</span>: <span class='ident'>UTC</span>::<span class='ident'>now</span>().<span class='ident'>add</span>(<span class='ident'>Duration</span>::<span class='ident'>weeks</span>(<span class='number'>2</span>)),
+           <span class='ident'>check_in_duration</span>: <span class='number'>60</span>,
+           <span class='ident'>grand_finals_modifier</span>: <span class='prelude-val'>None</span>,
+};
+<span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>create_tournament</span>(<span class='kw-2'>&amp;</span><span class='ident'>tc</span>);
+<span class='comment'>// or you may create `TournamentCreate` by using a builder:</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>tcb</span> <span class='op'>=</span> <span class='ident'>TournamentCreate</span>::<span class='ident'>new</span>();
+<span class='ident'>tcb</span>.<span class='ident'>name</span>(<span class='string'>&quot;Test tournament&quot;</span>)
+  .<span class='ident'>tournament_type</span>(<span class='ident'>TournamentType</span>::<span class='ident'>SingleElimination</span>)
+  .<span class='ident'>url</span>(<span class='string'>&quot;TestUrl&quot;</span>)
+  .<span class='ident'>subdomain</span>(<span class='string'>&quot;subdomain&quot;</span>)
+  .<span class='ident'>description</span>(<span class='string'>&quot;TEST TOURNAMENT created by challonge-rs&quot;</span>);
+<span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>create_tournament</span>(<span class='kw-2'>&amp;</span><span class='ident'>tcb</span>);</pre>
+</div><h4 id='method.update_tournament' class='method'><code>fn <a href='#method.update_tournament' class='fnname'>update_tournament</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, tournament: &amp;<a class='struct' href='../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/tournament/struct.Tournament.html' title='challonge::tournament::Tournament'>Tournament</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Update a tournament&#39;s attributes.</p>
+</div><h4 id='method.delete_tournament' class='method'><code>fn <a href='#method.delete_tournament' class='fnname'>delete_tournament</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Deletes a tournament along with all its associated records. There is no undo, so use with care!</p>
+</div><h4 id='method.tournament_process_checkins' class='method'><code>fn <a href='#method.tournament_process_checkins' class='fnname'>tournament_process_checkins</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, includes: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentIncludes.html' title='challonge::tournament::TournamentIncludes'>TournamentIncludes</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>This should be invoked after a tournament&#39;s check-in window closes before the tournament is started.</p>
+
+<ol>
+<li>Marks participants who have not checked in as inactive.</li>
+<li>Moves inactive participants to bottom seeds (ordered by original seed).</li>
+<li>Transitions the tournament state from &#39;checking_in&#39; to &#39;checked_in&#39;</li>
+</ol>
+
+<p>NOTE: Checked in participants on the waiting list will be promoted if slots become available.</p>
+</div><h4 id='method.tournament_abort_checkins' class='method'><code>fn <a href='#method.tournament_abort_checkins' class='fnname'>tournament_abort_checkins</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, includes: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentIncludes.html' title='challonge::tournament::TournamentIncludes'>TournamentIncludes</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>When your tournament is in a &#39;checking_in&#39; or &#39;checked_in&#39; state, there&#39;s no way to edit the tournament&#39;s start time (start_at) or check-in duration (check_in_duration). You must first abort check-in, then you may edit those attributes.</p>
+
+<ol>
+<li>Makes all participants active and clears their checked_in_at times.</li>
+<li>Transitions the tournament state from &#39;checking_in&#39; or &#39;checked_in&#39; to &#39;pending&#39;</li>
+</ol>
+</div><h4 id='method.tournament_start' class='method'><code>fn <a href='#method.tournament_start' class='fnname'>tournament_start</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, includes: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentIncludes.html' title='challonge::tournament::TournamentIncludes'>TournamentIncludes</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Start a tournament, opening up first round matches for score reporting. The tournament must have at least 2 participants.</p>
+</div><h4 id='method.tournament_finalize' class='method'><code>fn <a href='#method.tournament_finalize' class='fnname'>tournament_finalize</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, includes: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentIncludes.html' title='challonge::tournament::TournamentIncludes'>TournamentIncludes</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Finalize a tournament that has had all match scores submitted, rendering its results permanent.</p>
+</div><h4 id='method.tournament_reset' class='method'><code>fn <a href='#method.tournament_reset' class='fnname'>tournament_reset</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, includes: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentIncludes.html' title='challonge::tournament::TournamentIncludes'>TournamentIncludes</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Reset a tournament, clearing all of its scores and attachments. You can then add/remove/edit participants before starting the tournament again.</p>
+</div><h4 id='method.participant_index' class='method'><code>fn <a href='#method.participant_index' class='fnname'>participant_index</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/participants/struct.Index.html' title='challonge::participants::Index'>ParticipantIndex</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Retrieve a tournament&#39;s participant list.</p>
+</div><h4 id='method.create_participant' class='method'><code>fn <a href='#method.create_participant' class='fnname'>create_participant</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, participant: &amp;<a class='struct' href='../challonge/participants/struct.ParticipantCreate.html' title='challonge::participants::ParticipantCreate'>ParticipantCreate</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/participants/struct.Participant.html' title='challonge::participants::Participant'>Participant</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Add a participant to a tournament (up until it is started).</p>
+</div><h4 id='method.get_participant' class='method'><code>fn <a href='#method.get_participant' class='fnname'>get_participant</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, participant_id: &amp;<a class='struct' href='../challonge/participants/struct.ParticipantId.html' title='challonge::participants::ParticipantId'>ParticipantId</a>, include_matches: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/participants/struct.Participant.html' title='challonge::participants::Participant'>Participant</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Retrieve a single participant record for a tournament.</p>
+</div><h4 id='method.update_participant' class='method'><code>fn <a href='#method.update_participant' class='fnname'>update_participant</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, participant_id: &amp;<a class='struct' href='../challonge/participants/struct.ParticipantId.html' title='challonge::participants::ParticipantId'>ParticipantId</a>, participant: &amp;<a class='struct' href='../challonge/participants/struct.ParticipantCreate.html' title='challonge::participants::ParticipantCreate'>ParticipantCreate</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Update the attributes of a tournament participant.</p>
+</div><h4 id='method.check_in_participant' class='method'><code>fn <a href='#method.check_in_participant' class='fnname'>check_in_participant</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, participant_id: &amp;<a class='struct' href='../challonge/participants/struct.ParticipantId.html' title='challonge::participants::ParticipantId'>ParticipantId</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Checks a participant in, setting checked_in_at to the current time.</p>
+</div><h4 id='method.undo_check_in_participant' class='method'><code>fn <a href='#method.undo_check_in_participant' class='fnname'>undo_check_in_participant</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, participant_id: &amp;<a class='struct' href='../challonge/participants/struct.ParticipantId.html' title='challonge::participants::ParticipantId'>ParticipantId</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Marks a participant as having not checked in, setting checked_in_at to nil.</p>
+</div><h4 id='method.delete_participant' class='method'><code>fn <a href='#method.delete_participant' class='fnname'>delete_participant</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, participant_id: &amp;<a class='struct' href='../challonge/participants/struct.ParticipantId.html' title='challonge::participants::ParticipantId'>ParticipantId</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>If the tournament has not started, delete a participant, automatically filling in the abandoned seed number.
+If tournament is underway, mark a participant inactive, automatically forfeiting his/her remaining matches. </p>
+</div><h4 id='method.randomize_participants' class='method'><code>fn <a href='#method.randomize_participants' class='fnname'>randomize_participants</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Randomize seeds among participants. Only applicable before a tournament has started.</p>
+</div><h4 id='method.match_index' class='method'><code>fn <a href='#method.match_index' class='fnname'>match_index</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, state: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../challonge/matches/enum.MatchState.html' title='challonge::matches::MatchState'>MatchState</a>&gt;, participant_id: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../challonge/participants/struct.ParticipantId.html' title='challonge::participants::ParticipantId'>ParticipantId</a>&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/matches/struct.Index.html' title='challonge::matches::Index'>MatchIndex</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Retrieve a tournament&#39;s match list.</p>
+</div><h4 id='method.get_match' class='method'><code>fn <a href='#method.get_match' class='fnname'>get_match</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, match_id: &amp;<a class='struct' href='../challonge/matches/struct.MatchId.html' title='challonge::matches::MatchId'>MatchId</a>, include_attachments: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/matches/struct.Match.html' title='challonge::matches::Match'>Match</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Retrieve a single match record for a tournament.</p>
+</div><h4 id='method.update_match' class='method'><code>fn <a href='#method.update_match' class='fnname'>update_match</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, match_id: &amp;<a class='struct' href='../challonge/matches/struct.MatchId.html' title='challonge::matches::MatchId'>MatchId</a>, match_update: &amp;<a class='struct' href='../challonge/matches/struct.MatchUpdate.html' title='challonge::matches::MatchUpdate'>MatchUpdate</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/matches/struct.Match.html' title='challonge::matches::Match'>Match</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Update/submit the score(s) for a match.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "challonge";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
