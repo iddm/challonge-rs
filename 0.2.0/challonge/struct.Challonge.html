@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-1376' class='srclink' href='../src/challonge/src/lib.rs.html#195-198' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1422' class='srclink' href='../src/challonge/src/lib.rs.html#175-178' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Challonge {
     // some fields omitted
 }</pre><div class='docblock'><p>Client for the Challonge REST API.</p>
@@ -92,7 +92,7 @@
 
 <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Challonge</span>::<span class='ident'>new</span>(<span class='string'>&quot;myusername&quot;</span>, <span class='string'>&quot;myapikey&quot;</span>);
 <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>TournamentIncludes</span>::<span class='ident'>Matches</span>;
-<span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>get_tournament</span>(<span class='kw-2'>&amp;</span><span class='ident'>TournamentId</span>::<span class='ident'>Id</span>(<span class='number'>2669881</span>), <span class='ident'>i</span>);</pre>
+<span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>get_tournament</span>(<span class='kw-2'>&amp;</span><span class='ident'>TournamentId</span>::<span class='ident'>Id</span>(<span class='number'>2669881</span>), <span class='kw-2'>&amp;</span><span class='ident'>i</span>);</pre>
 </div><h4 id='method.create_tournament' class='method'><code>fn <a href='#method.create_tournament' class='fnname'>create_tournament</a>(&amp;self, tournament: &amp;<a class='struct' href='../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/tournament/struct.Tournament.html' title='challonge::tournament::Tournament'>Tournament</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
 <div class='docblock'><p>Create a new tournament.</p>
 
@@ -104,7 +104,7 @@
 <span class='kw'>use</span> <span class='ident'>challonge</span>::<span class='ident'>tournament</span>::<span class='ident'>TournamentCreate</span>;
 
 <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Challonge</span>::<span class='ident'>new</span>(<span class='string'>&quot;myusername&quot;</span>, <span class='string'>&quot;myapikey&quot;</span>);
-<span class='kw'>let</span> <span class='ident'>tc</span> <span class='op'>=</span> <span class='ident'>TournamentCreate</span> {
+<span class='kw'>let</span> <span class='ident'>tc</span> <span class='op'>=</span> <span class='ident'>TournamentCreate</span> { <span class='comment'>// explicitly define the whole structure</span>
            <span class='ident'>name</span>: <span class='string'>&quot;Tester&quot;</span>.<span class='ident'>to_owned</span>(),
            <span class='ident'>tournament_type</span>: <span class='ident'>TournamentType</span>::<span class='ident'>SingleElimination</span>,
            <span class='ident'>url</span>: <span class='string'>&quot;testerurl&quot;</span>.<span class='ident'>to_owned</span>(),
@@ -141,7 +141,7 @@
   .<span class='ident'>url</span>(<span class='string'>&quot;TestUrl&quot;</span>)
   .<span class='ident'>subdomain</span>(<span class='string'>&quot;subdomain&quot;</span>)
   .<span class='ident'>description</span>(<span class='string'>&quot;TEST TOURNAMENT created by challonge-rs&quot;</span>);
-<span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>create_tournament</span>(<span class='kw-2'>&amp;</span><span class='ident'>tcb</span>);</pre>
+<span class='kw'>let</span> <span class='ident'>tb</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>create_tournament</span>(<span class='kw-2'>&amp;</span><span class='ident'>tcb</span>);</pre>
 </div><h4 id='method.update_tournament' class='method'><code>fn <a href='#method.update_tournament' class='fnname'>update_tournament</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, tournament: &amp;<a class='struct' href='../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../challonge/tournament/struct.Tournament.html' title='challonge::tournament::Tournament'>Tournament</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
 <div class='docblock'><p>Update a tournament&#39;s attributes.</p>
 </div><h4 id='method.delete_tournament' class='method'><code>fn <a href='#method.delete_tournament' class='fnname'>delete_tournament</a>(&amp;self, id: &amp;<a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>

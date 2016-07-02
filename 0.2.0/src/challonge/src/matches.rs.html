@@ -386,6 +386,21 @@
 <span id="342">342</span>
 <span id="343">343</span>
 <span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Challonge Match type.</span>
 
@@ -544,6 +559,21 @@
 
     <span class='doccomment'>/// Overwrites the number of votes for player 2</span>
     <span class='kw'>pub</span> <span class='ident'>player2_votes</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span>,
+}
+<span class='kw'>impl</span> <span class='ident'>MatchUpdate</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>MatchUpdate</span> {
+        <span class='ident'>MatchUpdate</span> {
+            <span class='ident'>scores_csv</span>: <span class='ident'>String</span>::<span class='ident'>default</span>(),
+            <span class='ident'>winner_id</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>player1_votes</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>player2_votes</span>: <span class='prelude-val'>None</span>,
+        }
+    }
+
+    <span class='macro'>builder_s</span><span class='macro'>!</span>(<span class='ident'>scores_csv</span>);
+    <span class='macro'>builder_o</span><span class='macro'>!</span>(<span class='ident'>winner_id</span>, <span class='ident'>ParticipantId</span>);
+    <span class='macro'>builder_o</span><span class='macro'>!</span>(<span class='ident'>player1_votes</span>, <span class='ident'>u64</span>);
+    <span class='macro'>builder_o</span><span class='macro'>!</span>(<span class='ident'>player2_votes</span>, <span class='ident'>u64</span>);
 }
 
 <span class='doccomment'>/// Challonge `Match` definition.</span>

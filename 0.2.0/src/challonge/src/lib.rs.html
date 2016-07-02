@@ -640,26 +640,6 @@
 <span id="596">596</span>
 <span id="597">597</span>
 <span id="598">598</span>
-<span id="599">599</span>
-<span id="600">600</span>
-<span id="601">601</span>
-<span id="602">602</span>
-<span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Client library for the [Challonge](https://challonge.com) REST API.</span>
 <span class='doccomment'>//!</span>
@@ -679,6 +659,8 @@
 
 <span class='kw'>use</span> <span class='ident'>chrono</span>::<span class='ident'>date</span>::<span class='ident'>Date</span>;
 <span class='kw'>use</span> <span class='ident'>chrono</span>::<span class='ident'>offset</span>::<span class='ident'>local</span>::<span class='ident'>Local</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>mod</span> <span class='ident'>macroses</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>tournament</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>participants</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>error</span>;
@@ -706,6 +688,7 @@
     <span class='ident'>Index</span> <span class='kw'>as</span> <span class='ident'>MatchIndex</span>,
 };
 <span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
+
 
 <span class='kw'>const</span> <span class='ident'>API_BASE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;https://api.challonge.com/v1&quot;</span>;
 
@@ -744,29 +727,6 @@
     <span class='ident'>headers</span>
 }
 
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>format_date</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>date</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {
-        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>date</span>.<span class='ident'>format</span>(<span class='string'>&quot;%Y-%m-%d&quot;</span>).<span class='ident'>to_string</span>()
-    }
-}
-
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>t</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {
-        <span class='macro'>concat</span><span class='macro'>!</span>(<span class='string'>&quot;tournament[&quot;</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>, <span class='string'>&quot;]&quot;</span>)
-    }
-}
-
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>p</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {
-        <span class='macro'>concat</span><span class='macro'>!</span>(<span class='string'>&quot;participant[&quot;</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>, <span class='string'>&quot;]&quot;</span>)
-    }
-}
-
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>m</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {
-        <span class='macro'>concat</span><span class='macro'>!</span>(<span class='string'>&quot;match[&quot;</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>, <span class='string'>&quot;]&quot;</span>)
-    }
-}
 
 <span class='kw'>type</span> <span class='ident'>FieldPairs</span> <span class='op'>=</span> <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>, <span class='ident'>String</span>)<span class='op'>&gt;</span>;
 
@@ -922,7 +882,7 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// let c = Challonge::new(&quot;myusername&quot;, &quot;myapikey&quot;);</span>
     <span class='doccomment'>/// let i = TournamentIncludes::Matches;</span>
-    <span class='doccomment'>/// let t = c.get_tournament(&amp;TournamentId::Id(2669881), i);</span>
+    <span class='doccomment'>/// let t = c.get_tournament(&amp;TournamentId::Id(2669881), &amp;i);</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_tournament</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>,
                           <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>TournamentId</span>,
@@ -944,7 +904,7 @@
     <span class='doccomment'>/// use challonge::tournament::TournamentCreate;</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// let c = Challonge::new(&quot;myusername&quot;, &quot;myapikey&quot;);</span>
-    <span class='doccomment'>/// let tc = TournamentCreate {</span>
+    <span class='doccomment'>/// let tc = TournamentCreate { // explicitly define the whole structure</span>
     <span class='doccomment'>///            name: &quot;Tester&quot;.to_owned(),</span>
     <span class='doccomment'>///            tournament_type: TournamentType::SingleElimination,</span>
     <span class='doccomment'>///            url: &quot;testerurl&quot;.to_owned(),</span>
@@ -981,7 +941,7 @@
     <span class='doccomment'>///   .url(&quot;TestUrl&quot;)</span>
     <span class='doccomment'>///   .subdomain(&quot;subdomain&quot;)</span>
     <span class='doccomment'>///   .description(&quot;TEST TOURNAMENT created by challonge-rs&quot;);</span>
-    <span class='doccomment'>/// let t = c.create_tournament(&amp;tcb);</span>
+    <span class='doccomment'>/// let tb = c.create_tournament(&amp;tcb);</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>create_tournament</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>tournament</span>: <span class='kw-2'>&amp;</span><span class='ident'>TournamentCreate</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Tournament</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>url</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}/tournaments.json&quot;</span>, <span class='ident'>API_BASE</span>);

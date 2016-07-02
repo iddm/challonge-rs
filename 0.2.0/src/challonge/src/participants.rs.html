@@ -266,6 +266,23 @@
 <span id="222">222</span>
 <span id="223">223</span>
 <span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Challonge Participant type.</span>
 
@@ -314,6 +331,23 @@
 
     <span class='doccomment'>/// Max: 255 characters. Multi-purpose field that is only visible via the API and handy for site integration (e.g. key to your users table). </span>
     <span class='kw'>pub</span> <span class='ident'>misc</span>: <span class='ident'>String</span>,
+}
+<span class='kw'>impl</span> <span class='ident'>ParticipantCreate</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>ParticipantCreate</span> {
+        <span class='ident'>ParticipantCreate</span> {
+            <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>challonge_username</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>email</span>: <span class='ident'>String</span>::<span class='ident'>default</span>(),
+            <span class='ident'>seed</span>: <span class='number'>1</span>,
+            <span class='ident'>misc</span>: <span class='ident'>String</span>::<span class='ident'>default</span>(),
+        }
+    }
+
+    <span class='macro'>builder_so</span><span class='macro'>!</span>(<span class='ident'>name</span>);
+    <span class='macro'>builder_so</span><span class='macro'>!</span>(<span class='ident'>challonge_username</span>);
+    <span class='macro'>builder_s</span><span class='macro'>!</span>(<span class='ident'>email</span>);
+    <span class='macro'>builder</span><span class='macro'>!</span>(<span class='ident'>seed</span>, <span class='ident'>u64</span>);
+    <span class='macro'>builder_s</span><span class='macro'>!</span>(<span class='ident'>misc</span>);
 }
 
 <span class='doccomment'>/// A list of participants for the tournament. </span>
