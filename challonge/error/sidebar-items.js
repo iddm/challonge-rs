@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Challonge REST API error type."]]});
