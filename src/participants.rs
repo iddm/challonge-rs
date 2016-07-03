@@ -47,6 +47,7 @@ pub struct ParticipantCreate {
     pub misc: String,
 }
 impl ParticipantCreate {
+    /// Creates a structure to create participant with default values.
     pub fn new() -> ParticipantCreate {
         ParticipantCreate {
             name: None,
@@ -71,6 +72,7 @@ pub struct Index {
     index: Vec<Participant>,
 }
 impl Index {
+    /// Decodes participants index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
         let mut ps = Vec::new();
         if let Some(arr) = value.as_array() {
@@ -87,36 +89,92 @@ impl Index {
 /// Challonge `Participant` definition.
 #[derive(Debug, Clone)]
 pub struct Participant {
+    /// Is a participant active
     pub active: bool,
+
+    /// Time when the participant was checked in
     pub checked_in_at: Option<DateTime<FixedOffset>>,
+
+    /// Time when the participant was added to the tournament 
     pub created_at: DateTime<FixedOffset>,
+
+    /// ??? 
     pub final_rank: Option<u64>,
+
+    /// ??? 
     pub group_id: Option<u64>,
+
+    /// ??? 
     pub icon: String,
+
+    /// Unique participant identifier
     pub id: ParticipantId,
+
+    /// Invitation id. 
     pub invitation_id: Option<u64>,
+
+    /// Invitation email. 
     pub invite_email: String,
+
+    /// ??? 
     pub misc: String,
+    
+    /// Name of the participant. 
     pub name: String,
+
+    /// ??? 
     pub on_waiting_list: bool,
+
+    /// Seed of the participant in the tournament.
     pub seed: u64,
+
+    /// Id of the tournament the participant belongs to. 
     pub tournament_id: u64,
+
+    /// Time when the participant was updated last time 
     pub updated_at: DateTime<FixedOffset>,
+
+    /// A name of a user in challonge system. 
     pub challonge_username: String,
+
+    /// Verified email address in challonge system. 
     pub challonge_email_address_verified: String,
+
+    /// Is the participant can be removed
     pub removable: bool,
+
+    /// ??? 
     pub participatable_or_invitation_attached: bool,
+    
+    /// Needs removal confirmation 
     pub confirm_remove: bool,
+
+    /// Participant has invitation pending yet. 
     pub invitation_pending: bool,
+
+    /// ??? 
     pub display_name_with_invitation_email_address: String,
+
+    /// ??? 
     pub email_hash: String,
+
+    /// ??? 
     pub username: String,
+
+    /// ??? 
     pub attached_participatable_portrait_url: String,
+
+    /// Is the participant able to check in 
     pub can_check_in: bool,
+
+    /// Did the participant check in 
     pub checked_in: bool,
+
+    /// Participant can be reactivated 
     pub reactivatable: bool,
 }
 impl Participant {
+    /// Decodes `Participant` from JSON.
     pub fn decode(value: Value) -> Result<Participant, Error> {
         let mut value = try!(into_map(value));
         let t = try!(remove(&mut value, "participant"));

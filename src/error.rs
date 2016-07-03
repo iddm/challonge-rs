@@ -26,6 +26,7 @@ pub enum Error {
     Api(&'static str),
 }
 impl Error {
+    /// Creates a `Error` from `hyper`'s client response.
     pub fn error_from_response(response: hyper::client::Response) -> Error {
         let status = response.status;
         let value = ::serde_json::from_reader(response).ok();

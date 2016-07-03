@@ -25,18 +25,34 @@ fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> 
 /// Tournament includes.
 #[derive(Debug, Clone)]
 pub enum TournamentIncludes {
+
+    /// Includes matches and participants
     All,
+
+    /// Includes matches 
     Matches,
+
+    /// Includes participants
     Participants,
 }
 
 /// Tournament ranking order.
 #[derive(Debug, Clone)]
 pub enum RankedBy {
+
+    /// Rank by number of matches won
     MatchWins,
+
+    /// Rank by number of games won
     GameWins,
+
+    /// Rank by points scored
     PointsScored,
+
+    /// Rank by difference in points
     PointsDifference,
+
+    /// Custom ranking rules
     Custom,
 }
 impl fmt::Display for RankedBy {
@@ -65,7 +81,10 @@ impl fmt::Display for RankedBy {
 /// Tournament ID is an integer value or pair of strings (subdomain and tournament url)
 #[derive(Debug, Clone, PartialEq)]
 pub enum TournamentId {
+    /// Subdomain and Tournament url
     Url(String, String),
+
+    /// Unique idenfifier (number) in challonge system
     Id(u64)
 }
 impl fmt::Display for TournamentId {
@@ -85,13 +104,24 @@ impl fmt::Display for TournamentId {
 /// Game points definition.
 #[derive(Debug, Clone, PartialEq)]
 pub struct GamePoints {
+
+    /// Points for winning a match 
     pub match_win: f64,
+
+    /// Points for tie match 
     pub match_tie: f64,
+
+    /// Points for winning a game 
     pub game_win: f64,
+
+    /// Points for a tie game 
     pub game_tie: f64,
+
+    /// ??? Points for exiting the tournament ???
     pub bye: Option<f64>,
 }
 impl GamePoints {
+    /// Creates new `GamePoints` with default values.
     pub fn new(match_win: f64,
                match_tie: f64,
                game_win: f64,
@@ -106,6 +136,7 @@ impl GamePoints {
         }
     }
 
+    /// Decode `GamePoints` from JSON.
     pub fn decode(mut map: &mut BTreeMap<String, Value>, prefix: &str) -> Result<GamePoints, Error> {
         let mut bye = None;
         if let Ok(bye_pts) = remove(&mut map, &format!("{}pts_for_bye", prefix)) {
@@ -141,6 +172,8 @@ pub struct TournamentCreate {
 
     /// Your event's name/title (Max: 60 characters)
     pub name: String,
+
+    /// Type of a tournament
     pub tournament_type: TournamentType,
 
     /// challonge.com/url (letters, numbers, and underscores only)
@@ -160,7 +193,11 @@ pub struct TournamentCreate {
 
     /// Only for Swiss system
     pub swiss_points: GamePoints,
+
+    /// Number of rounds in swiss system
     pub swiss_rounds: u64,
+
+    /// Tournament ranking type
     pub ranked_by: RankedBy,
 
     /// Only for Round Robin system
@@ -196,6 +233,7 @@ pub struct TournamentCreate {
     pub grand_finals_modifier: Option<String>,
 }
 impl TournamentCreate { 
+    /// Creates new `TournamentCreate` structure with default values.
     pub fn new() -> TournamentCreate {
         TournamentCreate {
             name: String::default(), 
@@ -245,68 +283,148 @@ impl TournamentCreate {
 /// Challonge `Tournament` definition.
 #[derive(Debug, Clone)]
 pub struct Tournament {
+    /// Tournament may have attachments
     pub accept_attachments: bool,
+
+    /// Participants are able to report stats of the match by themselves 
     pub allow_participant_match_reporting: bool,
+
+    /// Tournament supports anonymous voting
     pub anonymous_voting: bool,
     // category: ??,
     // check_in_duration: ??,
     // completed_at: ??,
+    /// Time when the tournament was created 
     pub created_at: DateTime<FixedOffset>,
+
+    /// `true` if created by the API
     pub created_by_api: bool,
+
+    /// ??? 
     pub credit_capped: bool,
+
+    /// Description of the tournament 
     pub description: String,
+
+    /// An id of the game the tournament belongs to 
     pub game_id: u64,
+
+    /// Tournament has group stages enabled 
     pub group_stages_enabled: bool,
+
+    /// Hide forums from users 
     pub hide_forum: bool,
+
+    /// Hide seeds from users 
     pub hide_seeds: bool,
+
+    /// ??? 
     pub hold_third_place_match: bool,
+
+    /// Unique tournament identifier in challonge system 
     pub id: u64,
+
+    /// Maximum number of predictions for each user
     pub max_predictions_per_user: u64,
+
+    /// Name of the tournament 
     pub name: String,
+
+    /// Should challonge system notify registered users when the matches available 
     pub notify_users_when_matches_open: bool,
+    /// Should challonge system notify registered users when the tournament has come to end
     pub notify_users_when_the_tournament_ends: bool,
+
+    /// Are signups open 
     pub open_signup: bool,
+    
+    /// Number of participants of the tournament
     pub participants_count: u64,
+
+    /// ???
     pub prediction_method: u64,
     // <predictions-opened-at nil="true"/>
+    /// ???
     pub private: bool,
+
+    /// ???
     pub progress_meter: u64,
+
+    /// A points for matches/games in swiss system 
     pub swiss_points: GamePoints,
+
+    /// ???
     pub quick_advance: bool,
     // <ranked-by>match wins</ranked-by>
+    /// Tournament will require score agreement from all of participants of the match
     pub require_score_agreement: bool,
+
+    /// A points for matches/games in round robin system 
     pub round_robin_points: GamePoints,
+    
+    /// ??? 
     pub sequential_pairings: bool,
+
+    /// Show rounds on the web page 
     pub show_rounds: bool,
     // <signup-cap nil="true"/>
     // <start-at nil="true"/>
+    //
+    /// Time when the tournament was started 
     pub started_at: Option<DateTime<FixedOffset>>, //2015-01-19T16:57:17-05:00</started-at>
     // <started-checking-in-at nil="true"/>
     // <state>underway</state>
+    /// Number of rounds in swiss system
     pub swiss_rounds: u64,
+
+    /// The tournament works with teams
     pub teams: bool,
     // <tie-breaks type="array">
     // <tie-break>match wins vs tied</tie-break>
     // <tie-break>game wins</tie-break>
     // <tie-break>points scored</tie-break>
     // </tie-breaks>
+    /// A type of the tournament 
     pub tournament_type: TournamentType,
-    pub updated_at: DateTime<FixedOffset>, //>2015-01-19T16:57:17-05:00</updated-at>
+
+    /// Time when the tournament was updated last time 
+    pub updated_at: DateTime<FixedOffset>,
+
+    /// Tournament url 
     pub url: String,
+
+    /// ??? 
     pub description_source: String,
     // <subdomain nil="true"/>
+    /// Full url to the web page of the tournament in challonge system
     pub full_challonge_url: String,
+
+    /// A url of `LIVE` image. 
     pub live_image_url: String,
     // <sign-up-url nil="true"/>
+    /// Tournament must be reviewed before finalizing.
     pub review_before_finalizing: bool,
+
+    /// Tournament accepts predictions 
     pub accepting_predictions: bool,
+
+    /// Participants are locked: can't be added or removed 
     pub participants_locked: bool,
+
+    /// Name of the game the tournament belongs to. 
     pub game_name: String,
+
+    /// Participants can be swapped in brackets 
     pub participants_swappable: bool,
+
+    /// ??? 
     pub team_convertable: bool,
+
+    /// Are the group stages were started already
     pub group_stages_were_started: bool,
 }
 impl Tournament {
+    /// Decodes `Tournament` from JSON.
     pub fn decode(value: Value) -> Result<Tournament, Error> {
         let mut value = try!(into_map(value));
         let t = try!(remove(&mut value, "tournament"));
@@ -382,9 +500,11 @@ fn decode_tournaments(value: Value) -> Vec<Tournament> {
 /// A list of tournaments of the account/organization.
 #[derive(Debug, Clone)]
 pub struct Index {
+    /// a list of tournaments in index
     pub tournaments: Vec<Tournament>
 }
 impl Index {
+    /// Decodes tournament index from JSON.
     pub fn decode(value: Value) -> Index {
         Index {
             tournaments: decode_tournaments(value)
@@ -395,12 +515,20 @@ impl Index {
 /// A type of a tournament. 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TournamentType {
+    /// [Single elimination system](https://en.wikipedia.org/wiki/Single-elimination_tournament)
     SingleElimination,
+
+    /// [Double elimination system](https://en.wikipedia.org/wiki/Double-elimination_tournament)
     DoubleElimination,
+
+    /// [Round robin tournament system](https://en.wikipedia.org/wiki/Round-robin_tournament)
     RoundRobin,
+
+    /// [Swiss tournament system](https://en.wikipedia.org/wiki/Swiss-system_tournament)
     Swiss
 }
 impl TournamentType {
+    /// Parses tournament type to GET HTTP-method parameters string
     pub fn to_get_param<'a>(&self) -> &'a str {
         match *self {
             TournamentType::SingleElimination => {
@@ -456,9 +584,16 @@ impl FromStr for TournamentType {
 /// Current tournament state. 
 #[derive(Debug, Clone)]
 pub enum TournamentState {
+    /// Tournament is in any state 
     All,
+
+    /// Tournament is in pending state 
     Pending,
+
+    /// Tournament is in progress at this moment 
     InProgress,
+
+    /// Tournament is finished 
     Ended
 }
 impl fmt::Display for TournamentState {
