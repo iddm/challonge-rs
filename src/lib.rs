@@ -22,6 +22,7 @@ pub mod tournament;
 pub mod participants;
 pub mod error;
 pub mod matches;
+pub mod attachments;
 pub use tournament::{
     Tournament,
     TournamentId,
@@ -43,6 +44,12 @@ pub use matches::{
     MatchUpdate,
     MatchId,
     Index as MatchIndex,
+};
+pub use attachments::{
+    AttachmentId,
+    Attachment,
+    AttachmentCreate,
+    Index as AttachmentIndex,
 };
 use error::Error;
 
@@ -98,6 +105,23 @@ fn pairs_to_string(params: FieldPairs) -> String {
     body
 }
 
+fn pcs_to_pairs(participants: Vec<ParticipantCreate>) -> FieldPairs {
+    let mut params = Vec::new();
+    for p in participants {
+        params.push((ps!("email"), p.email.clone()));
+        params.push((ps!("seed"), p.seed.to_string()));
+        params.push((ps!("misc"), p.misc.clone()));
+
+        if let Some(n) = p.name.as_ref() {
+            params.push((ps!("name"), n.clone()));
+        }
+        if let Some(un) = p.challonge_username.as_ref() {
+            params.push((ps!("challonge_username"), un.clone()));
+        }
+    }
+    params
+}
+
 fn pc_to_pairs(participant: &ParticipantCreate) -> FieldPairs {
     let mut params = vec![
         (p!("email"), participant.email.clone()),
@@ -110,6 +134,21 @@ fn pc_to_pairs(participant: &ParticipantCreate) -> FieldPairs {
     }
     if let Some(un) = participant.challonge_username.as_ref() {
         params.push((p!("challonge_username"), un.clone()));
+    }
+    params
+}
+
+fn at_to_pairs(attachment: &AttachmentCreate) -> FieldPairs {
+    let mut params = FieldPairs::new();
+   
+    if let Some(a) = attachment.asset.as_ref() {
+        params.push((a!("asset"), String::from_utf8(a.clone()).unwrap()));
+    }
+    if let Some(url) = attachment.url.as_ref() {
+        params.push((a!("url"), url.clone()));
+    }
+    if let Some(d) = attachment.description.as_ref() {
+        params.push((a!("description"), d.clone()));
     }
     params
 }
@@ -397,12 +436,21 @@ impl Challonge {
         Participant::decode(try!(serde_json::from_reader(response)))
     }
 
-    // / Bulk add participants to a tournament (up until it is started).
-    // / If an invalid participant is detected, bulk participant creation will halt and any previously added participants (from this API request) will be rolled back. 
-    // TODO
-    // pub fn create_participant_bulk(&self,
-    //                                id: TournamentId) -> Result<(), Error> {
-    // }
+    /// Bulk add participants to a tournament (up until it is started).
+    /// If an invalid participant is detected, bulk participant creation will halt and any previously added participants (from this API request) will be rolled back. 
+    pub fn create_participant_bulk(&self,
+                                   id: &TournamentId,
+                                   participants: Vec<ParticipantCreate>) -> Result<(), Error> {
+        let url = &format!("{}/tournaments/{}/participants/bulk_add.json",
+                           API_BASE,
+                           id.to_string());
+        let body = pairs_to_string(pcs_to_pairs(participants));
+        let response = try!(retry(|| self.client.post(url)
+                                        .headers(self.headers.clone())
+                                        .body(&body)));
+        let _ = try!(serde_json::from_reader(response));
+        Ok(())
+    }
     
     /// Retrieve a single participant record for a tournament.
     pub fn get_participant(&self,
@@ -543,11 +591,82 @@ impl Challonge {
         Match::decode(try!(serde_json::from_reader(response)))
     }
 
-//     pub fn attachments_index(&self,
-//                              id: TournamentId,
-//                              match_id: MatchId) -> Result<Attachment, Error> {
-//  https://api.challonge.com/v1/tournaments/{tournament}/matches/{match_id}/attachments.{json|xml}
-//     }
+    /// Retrieve a match's attachments. 
+    pub fn attachments_index(&self,
+                             id: &TournamentId,
+                             match_id: &MatchId) -> Result<AttachmentIndex, Error> {
+        let url = &format!("{}/tournaments/{}/matches/{}/attachments.json",
+                           API_BASE,
+                           id.to_string(),
+                           match_id.0);
+        let response = try!(retry(|| self.client.get(url)
+                                        .headers(self.headers.clone())));
+        AttachmentIndex::decode(try!(serde_json::from_reader(response)))
+    }
+
+    /// Retrieve a single match attachment record. 
+    pub fn get_attachment(&self,
+                          id: &TournamentId,
+                          match_id: &MatchId,
+                          attachment_id: &AttachmentId) -> Result<Attachment, Error> {
+        let url = &format!("{}/tournaments/{}/matches/{}/attachments/{}.json",
+                           API_BASE,
+                           id.to_string(),
+                           match_id.0,
+                           attachment_id.0);
+        let response = try!(retry(|| self.client.get(url)
+                                        .headers(self.headers.clone())));
+        Attachment::decode(try!(serde_json::from_reader(response)))
+    }
+
+    /// Add a file, link, or text attachment to a match. NOTE: The associated tournament's "accept_attachments" attribute must be true for this action to succeed. 
+    pub fn create_attachment(&self,
+                             id: &TournamentId,
+                             match_id: &MatchId,
+                             attachment: &AttachmentCreate) -> Result<Attachment, Error> {
+        let url = &format!("{}/tournaments/{}/matches/{}/attachments.json",
+                           API_BASE,
+                           id.to_string(),
+                           match_id.0);
+        let body = pairs_to_string(at_to_pairs(attachment));
+        let response = try!(retry(|| self.client.post(url)
+                                        .headers(self.headers.clone())
+                                        .body(&body)));
+        Attachment::decode(try!(serde_json::from_reader(response)))
+    }
+
+    /// Update the attributes of a match attachment.
+    pub fn update_attachment(&self,
+                             id: &TournamentId,
+                             match_id: &MatchId,
+                             attachment_id: &AttachmentId,
+                             attachment: &AttachmentCreate) -> Result<Attachment, Error> {
+        let url = &format!("{}/tournaments/{}/matches/{}/attachments/{}.json",
+                           API_BASE,
+                           id.to_string(),
+                           match_id.0,
+                           attachment_id.0);
+        let body = pairs_to_string(at_to_pairs(attachment));
+        let response = try!(retry(|| self.client.put(url)
+                                        .headers(self.headers.clone())
+                                        .body(&body)));
+        Attachment::decode(try!(serde_json::from_reader(response)))
+    }
+
+    /// Delete a match attachment. 
+    pub fn delete_attachment(&self,
+                             id: &TournamentId,
+                             match_id: &MatchId,
+                             attachment_id: &AttachmentId) -> Result<(), Error> {
+        let url = &format!("{}/tournaments/{}/matches/{}/attachments/{}.json",
+                           API_BASE,
+                           id.to_string(),
+                           match_id.0,
+                           attachment_id.0);
+        let _ = try!(retry(|| self.client.delete(url)
+                                        .headers(self.headers.clone())));
+        Ok(())
+    }
 
     fn tournament_action(&self,
                          endpoint: &str,
@@ -565,18 +684,18 @@ impl Challonge {
     // TODO refactor to be better
     fn add_tournament_includes(url: &mut hyper::Url, includes: &TournamentIncludes) {
         let mut pairs = url.query_pairs_mut();
-        match includes {
-            &TournamentIncludes::All => {
+        match *includes {
+            TournamentIncludes::All => {
                 pairs
                     .append_pair("include_participants", "1")
                     .append_pair("include_matches", "1");
             },
-            &TournamentIncludes::Matches => {
+            TournamentIncludes::Matches => {
                 pairs
                     .append_pair("include_participants", "0")
                     .append_pair("include_matches", "1");
             },
-            &TournamentIncludes::Participants => {
+            TournamentIncludes::Participants => {
                 pairs
                     .append_pair("include_participants", "1")
                     .append_pair("include_matches", "0");

@@ -29,6 +29,7 @@ fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MatchScore(pub u64, pub u64);
 impl MatchScore {
+    /// Decodes `MatchScore` from JSON.
     pub fn decode(string: &str) -> Result<MatchScore, Error> {
         let mut parts = string.trim().split('-');
         Ok(MatchScore (
@@ -50,6 +51,7 @@ pub struct MatchScores {
     scores: Vec<MatchScore>,
 }
 impl MatchScores {
+    /// Decodes `MatchScores` from JSON.
     pub fn decode(string: String) -> MatchScores {
         let mut scores = Vec::new();
         let mut iter = string.split(",");
@@ -83,9 +85,16 @@ pub struct MatchId(pub u64);
 /// Current match state. 
 #[derive(Debug, Clone, PartialEq)]
 pub enum MatchState {
+    /// Any state of a match. 
     All,
+
+    /// Match is in a pending state.
     Pending,
+
+    /// Match is open.
     Open,
+
+    /// Match is completed.
     Complete,
 }
 impl fmt::Display for MatchState {
@@ -127,6 +136,7 @@ pub struct Index {
     index: Vec<Match>,
 }
 impl Index {
+    /// Decodes match index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
         let mut ms = Vec::new();
         if let Some(arr) = value.as_array() {
@@ -157,6 +167,7 @@ pub struct MatchUpdate {
     pub player2_votes: Option<u64>,
 }
 impl MatchUpdate {
+    /// Creates new `MatchUpdate` structure with default values.
     pub fn new() -> MatchUpdate {
         MatchUpdate {
             scores_csv: String::default(),
@@ -172,37 +183,79 @@ impl MatchUpdate {
     builder_o!(player2_votes, u64);
 }
 
+/// Player data in match.
+#[derive(Debug, Clone)]
+pub struct Player {
+    id: ParticipantId,
+    is_prereq_match_loser: bool,
+    prereq_match_id: Option<MatchId>,
+    votes: u64
+}
+impl Player {
+    /// Decodes `Player` from JSON
+    pub fn decode(mut map: &mut BTreeMap<String, Value>, prefix: &str) -> Result<Player, Error> {
+        Ok(Player {
+            id: ParticipantId(try!(remove(&mut map, &format!("{}id", prefix))).as_u64().unwrap()),
+            is_prereq_match_loser: try!(remove(&mut map, &format!("{}is_prereq_match_loser", prefix))).as_boolean().unwrap(),
+            prereq_match_id: try!(remove(&mut map, &format!("{}prereq_match_id", prefix)))
+                .as_u64().map_or(None, |i| Some(MatchId(i))),
+            votes: try!(remove(&mut map, &format!("{}votes", prefix))).as_u64().unwrap_or(0),
+        })
+    }
+}
+
 /// Challonge `Match` definition.
 #[derive(Debug, Clone)]
 pub struct Match {
     // attachment_count: ,
+    /// Holds a time when match was created.
     created_at: DateTime<FixedOffset>,
     // group_id: ,
+    
+    /// Does the match has an attachment? 
     has_attachment: bool,
+
+    /// Unique Match identifier 
     id: MatchId,
+
+    /// ??? 
     identifier: String,
     // location: 
+    /// An id of user which lost the match 
     loser_id: Option<ParticipantId>,
-    player1_id: ParticipantId,
-    player1_is_prereq_match_loser: bool,
-    player1_prereq_match_id: Option<MatchId>,
-    player1_votes: u64, 
-    player2_id: ParticipantId,
-    player2_is_prereq_match_loser: bool,
-    player2_prereq_match_id: Option<MatchId>,
-    player2_votes: u64,
+
+    /// Information about first player 
+    player1: Player,
+
+    /// Information about second player 
+    player2: Player,
+
+    /// Number of current round of the match.
     round: u64,
-    // // // scheduled_time: 
+    // // // scheduled_time:
+    /// Holds a time when match was started.
     started_at: Option<DateTime<FixedOffset>>,
+
+    /// State of the match. 
     state: MatchState,
+
+    /// Id of a tournament to which this match belongs. 
     tournament_id: TournamentId,
     // // underway_at: 
+    /// A time when match was updated last time. 
     updated_at: DateTime<FixedOffset>,
+
+    /// An id of user which won the match 
     winner_id: Option<ParticipantId>,
+
+    /// ??? 
     prerequisite_match_ids_csv: String,
+
+    /// Match scores (pairs of score for first and second player) 
     scores_csv: MatchScores,
 }
 impl Match {
+    /// Decodes `Match` from JSON
     pub fn decode(value: Value) -> Result<Match, Error> {
         let mut value = try!(into_map(value));
         let t = try!(remove(&mut value, "match"));
@@ -222,16 +275,8 @@ impl Match {
             identifier: try!(remove(&mut tv, "identifier")).as_string().unwrap_or("").to_owned(),
             loser_id: try!(remove(&mut tv, "loser_id")).as_u64()
                 .map_or(None, |i| Some(ParticipantId(i))),
-            player1_id: ParticipantId(try!(remove(&mut tv, "player1_id")).as_u64().unwrap()),
-            player1_is_prereq_match_loser: try!(remove(&mut tv, "player1_is_prereq_match_loser")).as_boolean().unwrap(),
-            player1_prereq_match_id: try!(remove(&mut tv, "player1_prereq_match_id"))
-                .as_u64().map_or(None, |i| Some(MatchId(i))),
-            player1_votes: try!(remove(&mut tv, "player1_votes")).as_u64().unwrap_or(0),
-            player2_id: ParticipantId(try!(remove(&mut tv, "player2_id")).as_u64().unwrap()),
-            player2_is_prereq_match_loser: try!(remove(&mut tv, "player2_is_prereq_match_loser")).as_boolean().unwrap(),
-            player2_prereq_match_id: try!(remove(&mut tv, "player2_prereq_match_id"))
-                .as_u64().map_or(None, |i| Some(MatchId(i))),
-            player2_votes: try!(remove(&mut tv, "player2_votes")).as_u64().unwrap_or(0),
+            player1: Player::decode(&mut tv, "player1_").unwrap(),
+            player2: Player::decode(&mut tv, "player2_").unwrap(),
             round: try!(remove(&mut tv, "round")).as_u64().unwrap(),
             started_at: started_at,
             state: MatchState::from_str(try!(remove(&mut tv, "state")).as_string()
@@ -325,14 +370,14 @@ mod tests {
             assert_eq!(m.id.0, 23575258);
             assert_eq!(m.identifier, "A");
             assert_eq!(m.loser_id, None);
-            assert_eq!(m.player1_id.0, 16543993);
-            assert_eq!(m.player1_is_prereq_match_loser, false);
-            assert_eq!(m.player1_prereq_match_id, None);
-            assert_eq!(m.player1_votes, 0);
-            assert_eq!(m.player2_is_prereq_match_loser, false);
-            assert_eq!(m.player2_prereq_match_id, None);
-            assert_eq!(m.player2_id.0, 16543997);
-            assert_eq!(m.player2_votes, 3);
+            assert_eq!(m.player1.id.0, 16543993);
+            assert_eq!(m.player1.is_prereq_match_loser, false);
+            assert_eq!(m.player1.prereq_match_id, None);
+            assert_eq!(m.player1.votes, 0);
+            assert_eq!(m.player2.is_prereq_match_loser, false);
+            assert_eq!(m.player2.prereq_match_id, None);
+            assert_eq!(m.player2.id.0, 16543997);
+            assert_eq!(m.player2.votes, 3);
             assert_eq!(m.round, 1);
             // assert_eq!(m.started_at, );
             assert_eq!(m.state, MatchState::Open);

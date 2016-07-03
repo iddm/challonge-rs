@@ -3,7 +3,6 @@ extern crate chrono;
 
 use challonge::Challonge;
 use challonge::tournament::{
-    RankedBy,
     TournamentId,
     TournamentCreate,
     TournamentType,
@@ -13,7 +12,6 @@ use challonge::tournament::{
 use challonge::ParticipantCreate;
 use chrono::*;
 
-use std::ops::Add;
 
 fn main() {
     let c = Challonge::new("myusername", "myapi_key");
