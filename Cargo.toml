@@ -9,7 +9,7 @@ license = "GPL-3.0"
 keywords = ["challonge", "tourney", "tournament", "api", "system"]
 
 repository = "https://github.com/vityafx/challonge-rs"
-documentation = "https://vityafx.github.io/challonge-rs/0.2.0/challonge/"
+documentation = "https://vityafx.github.io/challonge-rs/0.3.0/challonge/"
 
 [dependencies]
 hyper = "0.9.7"
