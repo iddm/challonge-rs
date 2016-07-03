@@ -1,4 +1,4 @@
-# challonge-rs [![](https://meritbadge.herokuapp.com/challonge)](https://crates.io/crates/challonge) [![](https://img.shields.io/badge/docs-online-2020ff.svg)](https://vityafx.github.io/challonge-rs/0.2.0/challonge/) [![Build Status](https://travis-ci.org/vityafx/challonge-rs.svg?branch=travis)](https://travis-ci.org/vityafx/challonge-rs)
+# challonge-rs [![](https://meritbadge.herokuapp.com/challonge)](https://crates.io/crates/challonge) [![](https://img.shields.io/badge/docs-online-2020ff.svg)](https://vityafx.github.io/challonge-rs/0.2.0/challonge/) [![Build Status](https://travis-ci.org/vityafx/challonge-rs.svg?branch=master)](https://travis-ci.org/vityafx/challonge-rs)
 
 
 Client library for the [Challonge](https://challonge.com) REST API.
