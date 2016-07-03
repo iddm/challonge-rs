@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Index","A list of participants for the tournament."],["Participant","Challonge `Participant` definition."],["ParticipantCreate","A structure for creating a participant (adding the participant to the tournament)."],["ParticipantId","Represents an ID of a participant"]]});

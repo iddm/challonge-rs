@@ -1,0 +1,10 @@
+(function() {var implementors = {};
+implementors['libc'] = [];implementors['openssl'] = ["impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> for <a class='struct' href='openssl/crypto/pkey/struct.PKey.html' title='openssl::crypto::pkey::PKey'>PKey</a>","impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> for <a class='struct' href='openssl/ssl/struct.SslContext.html' title='openssl::ssl::SslContext'>SslContext</a>","impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> for <a class='struct' href='openssl/ssl/struct.Ssl.html' title='openssl::ssl::Ssl'>Ssl</a>",];implementors['chrono'] = ["impl&lt;Tz: <a class='trait' href='chrono/offset/trait.TimeZone.html' title='chrono::offset::TimeZone'>TimeZone</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> for <a class='struct' href='chrono/date/struct.Date.html' title='chrono::date::Date'>Date</a>&lt;Tz&gt; <span class='where'>where Tz::Offset: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a></span>","impl&lt;Tz: <a class='trait' href='chrono/offset/trait.TimeZone.html' title='chrono::offset::TimeZone'>TimeZone</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> for <a class='struct' href='chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;Tz&gt; <span class='where'>where Tz::Offset: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a></span>",];implementors['serde'] = [];implementors['hyper'] = [];
+
+            if (window.register_implementors) {
+                window.register_implementors(implementors);
+            } else {
+                window.pending_implementors = implementors;
+            }
+        
+})()

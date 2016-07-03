@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Attachment` struct in crate `challonge`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Attachment">
+
+    <title>challonge::attachments::Attachment - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>challonge</a>::<wbr><a href='index.html'>attachments</a></p><script>window.sidebarCurrent = {name: 'Attachment', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>challonge</a>::<wbr><a href='index.html'>attachments</a>::<wbr><a class='struct' href=''>Attachment</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1464' class='srclink' href='../../src/challonge/src/attachments.rs.html#85-113' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Attachment {
+    pub id: <a class='struct' href='../../challonge/attachments/struct.AttachmentId.html' title='challonge::attachments::AttachmentId'>AttachmentId</a>,
+    pub match_id: <a class='struct' href='../../challonge/matches/struct.MatchId.html' title='challonge::matches::MatchId'>MatchId</a>,
+    pub user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>,
+    pub url: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub description: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub original_file_name: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub created_at: <a class='struct' href='../../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../../chrono/offset/fixed/struct.FixedOffset.html' title='chrono::offset::fixed::FixedOffset'>FixedOffset</a>&gt;,
+    pub updated_at: <a class='struct' href='../../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../../chrono/offset/fixed/struct.FixedOffset.html' title='chrono::offset::fixed::FixedOffset'>FixedOffset</a>&gt;,
+    pub asset: <a class='struct' href='../../challonge/attachments/struct.Asset.html' title='challonge::attachments::Asset'>Asset</a>,
+}</pre><div class='docblock'><p>Challonge <code>Attachment</code> definition.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                             <td id='structfield.id'><code>id</code></td><td><div class='docblock'><p>Unique attachment identifier</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.match_id'><code>match_id</code></td><td><div class='docblock'><p>Unique match identifier</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.user_id'><code>user_id</code></td><td><div class='docblock'><p>???</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.url'><code>url</code></td><td><div class='docblock'><p>A web (http, ftp) link</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.description'><code>description</code></td><td><div class='docblock'><p>Description of an attachment
+Text to describe the file or URL attachment, or this can simply be standalone text. </p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.original_file_name'><code>original_file_name</code></td><td><div class='docblock'><p>Original attachment file name.</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.created_at'><code>created_at</code></td><td><div class='docblock'><p>Time when the attachment was created.</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.updated_at'><code>updated_at</code></td><td><div class='docblock'><p>Time when the attachment was updated last time.</p>
+</div></td></tr><tr class='stab '>
+                             <td id='structfield.asset'><code>asset</code></td><td><div class='docblock'><p>Asset information</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../challonge/attachments/struct.Attachment.html' title='challonge::attachments::Attachment'>Attachment</a></code></h3><div class='impl-items'><h4 id='method.decode' class='method'><code>fn <a href='#method.decode' class='fnname'>decode</a>(value: <a class='enum' href='../../serde_json/value/enum.Value.html' title='serde_json::value::Value'>Value</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../challonge/attachments/struct.Attachment.html' title='challonge::attachments::Attachment'>Attachment</a>, <a class='enum' href='../../challonge/error/enum.Error.html' title='challonge::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Decodes <code>Attachment</code> from JSON</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../challonge/attachments/struct.Attachment.html' title='challonge::attachments::Attachment'>Attachment</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../challonge/attachments/struct.Attachment.html' title='challonge::attachments::Attachment'>Attachment</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../challonge/attachments/struct.Attachment.html' title='challonge::attachments::Attachment'>Attachment</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "challonge";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
