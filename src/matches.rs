@@ -8,21 +8,10 @@ use std::collections::BTreeMap;
 use std::fmt;
 use std::str::FromStr;
 
+use util::{decode_array, into_map, remove};
 use error::Error;
 use participants::ParticipantId;
 use tournament::TournamentId;
-
-
-fn into_map(value: Value) -> Result<BTreeMap<String, serde_json::Value>, Error> {
-    match value {
-        Value::Object(m) => Ok(m),
-        value => Err(Error::Decode("Expected object", value)),
-    }
-}
-
-fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> {
-    map.remove(key).ok_or(Error::Decode("Unexpected absent key", Value::String(key.into())))
-}
 
 
 /// Represents a pair of scores - for player 1 and player 2 respectively.
@@ -138,15 +127,9 @@ pub struct Index {
 impl Index {
     /// Decodes match index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        let mut ms = Vec::new();
-        if let Some(arr) = value.as_array() {
-            for o in arr {
-                if let Ok(m) = Match::decode(o.clone().to_owned()) {
-                    ms.push(m);
-                }
-            }
-        }
-        Ok(Index { index: ms })
+        Ok(Index {
+            index: try!(decode_array(value, Match::decode)),
+        })
     }
 }
 

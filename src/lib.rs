@@ -18,6 +18,7 @@ use chrono::date::Date;
 use chrono::offset::local::Local;
 #[macro_use]
 mod macroses;
+mod util;
 pub mod tournament;
 pub mod participants;
 pub mod error;
@@ -266,7 +267,7 @@ impl Challonge {
             .append_pair("subdomain", subdomain);
         
         let response = try!(retry(|| self.client.get(url.as_str()).headers(self.headers.clone())));
-        Ok(TournamentIndex::decode(try!(serde_json::from_reader(response))))
+        TournamentIndex::decode(try!(serde_json::from_reader(response)))
     }
 
     /// Retrieve a single tournament record created with your account. 

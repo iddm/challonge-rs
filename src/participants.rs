@@ -4,21 +4,9 @@ extern crate serde_json;
 
 use serde_json::Value;
 use chrono::*;
-use std::collections::BTreeMap;
 
+use util::{decode_array, into_map, remove};
 use error::Error;
-
-
-fn into_map(value: Value) -> Result<BTreeMap<String, serde_json::Value>, Error> {
-    match value {
-        Value::Object(m) => Ok(m),
-        value => Err(Error::Decode("Expected object", value)),
-    }
-}
-
-fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> {
-    map.remove(key).ok_or(Error::Decode("Unexpected absent key", Value::String(key.into())))
-}
 
 /// Represents an ID of a participant
 #[derive(Debug, Clone, PartialEq)]
@@ -74,15 +62,9 @@ pub struct Index {
 impl Index {
     /// Decodes participants index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        let mut ps = Vec::new();
-        if let Some(arr) = value.as_array() {
-            for o in arr {
-                if let Ok(p) = Participant::decode(o.clone().to_owned()) {
-                    ps.push(p);
-                }
-            }
-        }
-        Ok(Index { index: ps })
+        Ok(Index {
+            index: try!(decode_array(value, Participant::decode))
+        })
     }
 }
 

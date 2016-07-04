@@ -8,19 +8,8 @@ use std::fmt;
 use std::str::FromStr;
 use std::collections::BTreeMap;
 
+use util::{decode_array, into_map, remove};
 use error::Error;
-
-
-fn into_map(value: Value) -> Result<BTreeMap<String, serde_json::Value>, Error> {
-    match value {
-        Value::Object(m) => Ok(m),
-        value => Err(Error::Decode("Expected object", value)),
-    }
-}
-
-fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> {
-    map.remove(key).ok_or(Error::Decode("Unexpected absent key", Value::String(key.into())))
-}
 
 /// Tournament includes.
 #[derive(Debug, Clone)]
@@ -485,17 +474,6 @@ impl Tournament {
         })
     }
 }
-fn decode_tournaments(value: Value) -> Vec<Tournament> {
-    let mut ts = Vec::new();
-    if let Some(arr) = value.as_array() {
-        for o in arr {
-            if let Ok(t) = Tournament::decode(o.clone().to_owned()) {
-                ts.push(t);
-            }
-        }
-    }
-    ts
-}
 
 /// A list of tournaments of the account/organization.
 #[derive(Debug, Clone)]
@@ -505,10 +483,10 @@ pub struct Index {
 }
 impl Index {
     /// Decodes tournament index from JSON.
-    pub fn decode(value: Value) -> Index {
-        Index {
-            tournaments: decode_tournaments(value)
-        }
+    pub fn decode(value: Value) -> Result<Index, Error> {
+        Ok(Index {
+            tournaments: try!(decode_array(value, Tournament::decode)),
+        })
     }
 }
 
