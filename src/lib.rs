@@ -16,9 +16,9 @@ extern crate chrono;
 
 use chrono::date::Date;
 use chrono::offset::local::Local;
-use serde_json::Value;
 #[macro_use]
 mod macroses;
+mod util;
 pub mod tournament;
 pub mod participants;
 pub mod error;
@@ -708,19 +708,6 @@ impl Challonge {
     // fn prepare<'a>(&self, url: &str) -> hyper::client::RequestBuilder<'a> {
     //     self.client.get(url).headers(self.headers.clone())
     // }
-}
-
-#[doc(hidden)]
-pub fn decode_array<T, F: Fn(Value) -> Result<T, Error>>(
-    value: Value,
-    f: F
-) -> Result<Vec<T>, Error> {
-    match value {
-        Value::Array(arr) => arr.into_iter()
-            .map(f)
-            .collect(),
-        _ => Err(Error::Decode("Error decoding object", value)),
-    }
 }
 
 #[cfg(test)]

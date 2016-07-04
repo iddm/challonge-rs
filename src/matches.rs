@@ -8,22 +8,10 @@ use std::collections::BTreeMap;
 use std::fmt;
 use std::str::FromStr;
 
-use ::decode_array;
+use util::{decode_array, into_map, remove};
 use error::Error;
 use participants::ParticipantId;
 use tournament::TournamentId;
-
-
-fn into_map(value: Value) -> Result<BTreeMap<String, serde_json::Value>, Error> {
-    match value {
-        Value::Object(m) => Ok(m),
-        value => Err(Error::Decode("Expected object", value)),
-    }
-}
-
-fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> {
-    map.remove(key).ok_or(Error::Decode("Unexpected absent key", Value::String(key.into())))
-}
 
 
 /// Represents a pair of scores - for player 1 and player 2 respectively.

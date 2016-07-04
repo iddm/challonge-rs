@@ -6,20 +6,9 @@ use serde_json::Value;
 use chrono::*;
 use std::collections::BTreeMap;
 
-use ::decode_array;
+use util::{decode_array, into_map, remove};
 use matches::MatchId;
 use error::Error;
-
-fn into_map(value: Value) -> Result<BTreeMap<String, serde_json::Value>, Error> {
-    match value {
-        Value::Object(m) => Ok(m),
-        value => Err(Error::Decode("Expected object", value)),
-    }
-}
-
-fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> {
-    map.remove(key).ok_or(Error::Decode("Unexpected absent key", Value::String(key.into())))
-}
 
 /// Asset of a attachment
 #[derive(Debug, Clone)]
