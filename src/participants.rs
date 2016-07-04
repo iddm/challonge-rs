@@ -6,6 +6,7 @@ use serde_json::Value;
 use chrono::*;
 use std::collections::BTreeMap;
 
+use ::decode_array;
 use error::Error;
 
 
@@ -74,15 +75,9 @@ pub struct Index {
 impl Index {
     /// Decodes participants index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        let mut ps = Vec::new();
-        if let Some(arr) = value.as_array() {
-            for o in arr {
-                if let Ok(p) = Participant::decode(o.clone().to_owned()) {
-                    ps.push(p);
-                }
-            }
-        }
-        Ok(Index { index: ps })
+        Ok(Index {
+            index: try!(decode_array(value, Participant::decode))
+        })
     }
 }
 

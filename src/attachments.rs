@@ -6,6 +6,7 @@ use serde_json::Value;
 use chrono::*;
 use std::collections::BTreeMap;
 
+use ::decode_array;
 use matches::MatchId;
 use error::Error;
 
@@ -135,18 +136,11 @@ impl Attachment {
 /// Challonge Attachment index definition.
 #[derive(Debug, Clone)]
 pub struct Index(pub Vec<Attachment>);
+
 impl Index {
     /// Decodes attachment index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        let mut attachments = Vec::new();
-        if let Some(arr) = value.as_array() {
-            for o in arr {
-                if let Ok(a) = Attachment::decode(o.clone().to_owned()) {
-                    attachments.push(a);
-                }
-            }
-        }
-        Ok(Index(attachments))
+        Ok(Index(try!(decode_array(value, Attachment::decode))))
     }
 }
 

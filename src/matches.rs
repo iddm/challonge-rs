@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 use std::str::FromStr;
 
+use ::decode_array;
 use error::Error;
 use participants::ParticipantId;
 use tournament::TournamentId;
@@ -138,15 +139,9 @@ pub struct Index {
 impl Index {
     /// Decodes match index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        let mut ms = Vec::new();
-        if let Some(arr) = value.as_array() {
-            for o in arr {
-                if let Ok(m) = Match::decode(o.clone().to_owned()) {
-                    ms.push(m);
-                }
-            }
-        }
-        Ok(Index { index: ms })
+        Ok(Index {
+            index: try!(decode_array(value, Match::decode)),
+        })
     }
 }
 
