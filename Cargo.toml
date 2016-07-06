@@ -1,15 +1,15 @@
 [package]
 name = "challonge"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Victor Polevoy <maintainer@vpolevoy.com>"]
 
 description = "Client library for the Challonge REST API"
 readme = "README.md"
-license = "GPL-3.0"
+license = "MIT"
 keywords = ["challonge", "tourney", "tournament", "api", "system"]
 
 repository = "https://github.com/vityafx/challonge-rs"
-documentation = "https://vityafx.github.io/challonge-rs/0.3.0/challonge/"
+documentation = "https://vityafx.github.io/challonge-rs/0.4.0/challonge/"
 
 [dependencies]
 hyper = "0.9.7"
