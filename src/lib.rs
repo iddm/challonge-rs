@@ -449,7 +449,7 @@ impl Challonge {
         let response = try!(retry(|| self.client.post(url)
                                         .headers(self.headers.clone())
                                         .body(&body)));
-        let _ = try!(serde_json::from_reader(response));
+        let _: () = try!(serde_json::from_reader(response));
         Ok(())
     }
     
