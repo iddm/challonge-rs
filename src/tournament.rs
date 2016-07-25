@@ -624,7 +624,7 @@ impl fmt::Display for TournamentState {
 #[cfg(test)]
 mod tests {
     extern crate serde_json;
-    use tournament::{ Tournament, TournamentType };
+    use tournament::{ Tournament, TournamentType, TournamentId };
 
     #[test]
     fn test_tournament_parse() {
@@ -711,7 +711,12 @@ mod tests {
             assert_eq!(t.description, "sample description");
             assert_eq!(t.credit_capped, false);
             assert_eq!(t.game_id, 600);
-            assert_eq!(t.id.0, 1086875);
+            if let TournamentId::Id(num) = t.id {
+                assert_eq!(num, 1086875);
+            } else {
+                // Id should be parsed as numeric variable here.
+                assert!(false);
+            }
             assert_eq!(t.name, "Sample Tournament 1");
             assert_eq!(t.group_stages_enabled, false);
             assert_eq!(t.hide_forum, false);
