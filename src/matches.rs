@@ -132,9 +132,7 @@ impl FromStr for MatchState {
 /// A list of matches of the tournament. 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub struct Index {
-    index: Vec<Match>,
-}
+pub struct Index(pub Vec<Match>);
 impl Index {
     /// Decodes match index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
@@ -146,7 +144,7 @@ impl Index {
                 }
             }
         }
-        Ok(Index { index: ms })
+        Ok(Index(ms))
     }
 }
 
@@ -209,50 +207,50 @@ impl Player {
 pub struct Match {
     // attachment_count: ,
     /// Holds a time when match was created.
-    created_at: DateTime<FixedOffset>,
+    pub created_at: DateTime<FixedOffset>,
     // group_id: ,
     
     /// Does the match has an attachment? 
-    has_attachment: bool,
+    pub has_attachment: bool,
 
     /// Unique Match identifier 
-    id: MatchId,
+    pub id: MatchId,
 
     /// ??? 
-    identifier: String,
+    pub identifier: String,
     // location: 
     /// An id of user which lost the match 
-    loser_id: Option<ParticipantId>,
+    pub loser_id: Option<ParticipantId>,
 
     /// Information about first player 
-    player1: Player,
+    pub player1: Player,
 
     /// Information about second player 
-    player2: Player,
+    pub player2: Player,
 
     /// Number of current round of the match.
-    round: u64,
+    pub round: u64,
     // // // scheduled_time:
     /// Holds a time when match was started.
-    started_at: Option<DateTime<FixedOffset>>,
+    pub started_at: Option<DateTime<FixedOffset>>,
 
     /// State of the match. 
-    state: MatchState,
+    pub state: MatchState,
 
     /// Id of a tournament to which this match belongs. 
-    tournament_id: TournamentId,
+    pub tournament_id: TournamentId,
     // // underway_at: 
     /// A time when match was updated last time. 
-    updated_at: DateTime<FixedOffset>,
+    pub updated_at: DateTime<FixedOffset>,
 
     /// An id of user which won the match 
-    winner_id: Option<ParticipantId>,
+    pub winner_id: Option<ParticipantId>,
 
     /// ??? 
-    prerequisite_match_ids_csv: String,
+    pub prerequisite_match_ids_csv: String,
 
     /// Match scores (pairs of score for first and second player) 
-    scores_csv: MatchScores,
+    pub scores_csv: MatchScores,
 }
 impl Match {
     /// Decodes `Match` from JSON

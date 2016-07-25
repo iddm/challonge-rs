@@ -68,9 +68,7 @@ impl ParticipantCreate {
 /// A list of participants for the tournament. 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub struct Index {
-    index: Vec<Participant>,
-}
+pub struct Index(pub Vec<Participant>);
 impl Index {
     /// Decodes participants index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
@@ -82,7 +80,7 @@ impl Index {
                 }
             }
         }
-        Ok(Index { index: ps })
+        Ok(Index(ps))
     }
 }
 
