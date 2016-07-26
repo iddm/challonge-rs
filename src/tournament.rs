@@ -198,6 +198,9 @@ pub struct TournamentCreate {
     /// Hide this tournament from the public browsable index and your profile (default: false)
     pub private: bool,
 
+    /// Name of the game to which this tournament belongs to. 
+    pub game_name: Option<String>,
+
     /// Email registered Challonge participants when matches open up for them (default: false)
     pub notify_users_when_matches_open: bool,
 
@@ -238,6 +241,7 @@ impl TournamentCreate {
             round_robin_points: GamePoints::default(),
             show_rounds: false,
             private: false,
+            game_name: None,
             notify_users_when_matches_open: true,
             notify_users_when_the_tournament_ends: true,
             sequential_pairings: false,
@@ -261,6 +265,7 @@ impl TournamentCreate {
     builder!(round_robin_points, GamePoints);
     builder!(show_rounds, bool);
     builder!(private, bool);
+    builder_so!(game_name);
     builder!(notify_users_when_matches_open, bool);
     builder!(notify_users_when_the_tournament_ends, bool);
     builder!(sequential_pairings, bool);
@@ -311,7 +316,7 @@ pub struct Tournament {
     pub hold_third_place_match: bool,
 
     /// Unique tournament identifier in challonge system 
-    pub id: u64,
+    pub id: TournamentId,
 
     /// Maximum number of predictions for each user
     pub max_predictions_per_user: u64,
@@ -435,7 +440,7 @@ impl Tournament {
             credit_capped: try!(remove(&mut tv, "credit_capped")).as_boolean().unwrap_or(false),
             description: try!(remove(&mut tv, "description")).as_string().unwrap_or("").to_string(),
             game_id: try!(remove(&mut tv, "game_id")).as_u64().unwrap_or(0),
-            id: try!(remove(&mut tv, "id")).as_u64().unwrap_or(0),
+            id: TournamentId::Id(try!(remove(&mut tv, "id")).as_u64().unwrap_or(0)),
             name: try!(remove(&mut tv, "name")).as_string().unwrap_or("").to_string(),
             group_stages_enabled: try!(remove(&mut tv, "group_stages_enabled")).as_boolean().unwrap_or(false),
             hide_forum: try!(remove(&mut tv, "hide_forum")).as_boolean().unwrap_or(false),
@@ -477,16 +482,11 @@ impl Tournament {
 
 /// A list of tournaments of the account/organization.
 #[derive(Debug, Clone)]
-pub struct Index {
-    /// a list of tournaments in index
-    pub tournaments: Vec<Tournament>
-}
+pub struct Index(pub Vec<Tournament>);
 impl Index {
     /// Decodes tournament index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        Ok(Index {
-            tournaments: try!(decode_array(value, Tournament::decode)),
-        })
+        Ok(Index(try!(decode_array(value, Tournament::decode))))
     }
 }
 
@@ -597,7 +597,7 @@ impl fmt::Display for TournamentState {
 #[cfg(test)]
 mod tests {
     extern crate serde_json;
-    use tournament::{ Tournament, TournamentType };
+    use tournament::{ Tournament, TournamentType, TournamentId };
 
     #[test]
     fn test_tournament_parse() {
@@ -684,7 +684,12 @@ mod tests {
             assert_eq!(t.description, "sample description");
             assert_eq!(t.credit_capped, false);
             assert_eq!(t.game_id, 600);
-            assert_eq!(t.id, 1086875);
+            if let TournamentId::Id(num) = t.id {
+                assert_eq!(num, 1086875);
+            } else {
+                // Id should be parsed as numeric variable here.
+                assert!(false);
+            }
             assert_eq!(t.name, "Sample Tournament 1");
             assert_eq!(t.group_stages_enabled, false);
             assert_eq!(t.hide_forum, false);

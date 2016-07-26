@@ -56,15 +56,11 @@ impl ParticipantCreate {
 /// A list of participants for the tournament. 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub struct Index {
-    index: Vec<Participant>,
-}
+pub struct Index(pub Vec<Participant>);
 impl Index {
     /// Decodes participants index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        Ok(Index {
-            index: try!(decode_array(value, Participant::decode))
-        })
+        Ok(Index(try!(decode_array(value, Participant::decode))))
     }
 }
 

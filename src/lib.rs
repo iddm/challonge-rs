@@ -41,6 +41,8 @@ pub use participants::{
 };
 pub use matches::{
     Match,
+    MatchScore,
+    MatchScores,
     MatchState,
     MatchUpdate,
     MatchId,
@@ -190,6 +192,9 @@ fn tc_to_pairs(tournament: &TournamentCreate) -> FieldPairs {
     if let Some(s_bye_pts) = tournament.swiss_points.bye.as_ref() {
         params.push((t!("pts_for_bye"), s_bye_pts.to_string()));
     }
+    if let Some(game) = tournament.game_name.as_ref() {
+        params.push((t!("game_name"), game.clone()));
+    }
     params
 }
 
@@ -202,9 +207,7 @@ fn mu_to_pairs(mu: &MatchUpdate) -> FieldPairs {
     if let Some(v) = mu.player2_votes {
         params.push((m!("player2_votes"), v.to_string()));
     }
-    if !mu.scores_csv.is_empty() {
-        params.push((m!("scores_csv"), mu.scores_csv.clone()));
-    }
+    params.push((m!("scores_csv"), mu.scores_csv.to_string()));
     if let Some(w) = mu.winner_id.as_ref() {
         params.push((m!("winner_id"), w.0.to_string()));
     }
@@ -344,8 +347,8 @@ impl Challonge {
         let url = &format!("{}/tournaments.json", API_BASE);
         let body = pairs_to_string(tc_to_pairs(tournament));
         let response = try!(retry(|| self.client.post(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                                .headers(self.headers.clone())
+                                                .body(&body)));
         Tournament::decode(try!(serde_json::from_reader(response)))
     }
     
@@ -356,8 +359,8 @@ impl Challonge {
         let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
         let body = pairs_to_string(tc_to_pairs(tournament));
         let response = try!(retry(|| self.client.put(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                                .headers(self.headers.clone())
+                                                .body(&body)));
         Tournament::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -419,7 +422,7 @@ impl Challonge {
                            API_BASE,
                            id.to_string());
         let response = try!(retry(|| self.client.get(url)
-                                        .headers(self.headers.clone())));
+                                                .headers(self.headers.clone())));
         ParticipantIndex::decode(try!(serde_json::from_reader(response)))
     }
     
@@ -432,8 +435,8 @@ impl Challonge {
                            id.to_string());
         let body = pairs_to_string(pc_to_pairs(participant));
         let response = try!(retry(|| self.client.post(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                                .headers(self.headers.clone())
+                                                .body(&body)));
         Participant::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -447,8 +450,8 @@ impl Challonge {
                            id.to_string());
         let body = pairs_to_string(pcs_to_pairs(participants));
         let response = try!(retry(|| self.client.post(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                                .headers(self.headers.clone())
+                                                .body(&body)));
         let _: () = try!(serde_json::from_reader(response));
         Ok(())
     }
@@ -466,7 +469,7 @@ impl Challonge {
             .append_pair("include_matches", &(include_matches as i64).to_string());
         
         let response = try!(retry(|| self.client.get(url.as_str())
-                                        .headers(self.headers.clone())));
+                                                .headers(self.headers.clone())));
         Participant::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -481,8 +484,8 @@ impl Challonge {
                            participant_id.0);
         let body = pairs_to_string(pc_to_pairs(participant));
         let _ = try!(retry(|| self.client.put(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                         .headers(self.headers.clone())
+                                         .body(&body)));
         Ok(())
     }
 
@@ -495,7 +498,7 @@ impl Challonge {
                            id.to_string(),
                            participant_id.0);
         let _ = try!(retry(|| self.client.post(url)
-                                        .headers(self.headers.clone())));
+                                         .headers(self.headers.clone())));
         Ok(())
     }
     
@@ -509,7 +512,7 @@ impl Challonge {
                            id.to_string(),
                            participant_id.0);
         let _ = try!(retry(|| self.client.post(url)
-                                        .headers(self.headers.clone())));
+                                         .headers(self.headers.clone())));
         Ok(())
     }
 
@@ -523,7 +526,7 @@ impl Challonge {
                            id.to_string(),
                            participant_id.0);
         let _ = try!(retry(|| self.client.delete(url)
-                                        .headers(self.headers.clone())));
+                                         .headers(self.headers.clone())));
         Ok(())
     }
 
@@ -534,7 +537,7 @@ impl Challonge {
                            API_BASE,
                            id.to_string());
         let _ = try!(retry(|| self.client.post(url)
-                                        .headers(self.headers.clone())));
+                                         .headers(self.headers.clone())));
         Ok(())
     }
 
@@ -556,7 +559,7 @@ impl Challonge {
             }
         }
         let response = try!(retry(|| self.client.get(url.as_str())
-                                        .headers(self.headers.clone())));
+                                                .headers(self.headers.clone())));
         MatchIndex::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -572,7 +575,7 @@ impl Challonge {
         url.query_pairs_mut()
             .append_pair("include_attachments", &(include_attachments as i64).to_string());
         let response = try!(retry(|| self.client.get(url.as_str())
-                                        .headers(self.headers.clone())));
+                                                .headers(self.headers.clone())));
         Match::decode(try!(serde_json::from_reader(response)))
     }
     
@@ -587,8 +590,8 @@ impl Challonge {
                            match_id.0);
         let body = pairs_to_string(mu_to_pairs(match_update));
         let response = try!(retry(|| self.client.put(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                                .headers(self.headers.clone())
+                                                .body(&body)));
         Match::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -601,7 +604,7 @@ impl Challonge {
                            id.to_string(),
                            match_id.0);
         let response = try!(retry(|| self.client.get(url)
-                                        .headers(self.headers.clone())));
+                                                .headers(self.headers.clone())));
         AttachmentIndex::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -616,7 +619,7 @@ impl Challonge {
                            match_id.0,
                            attachment_id.0);
         let response = try!(retry(|| self.client.get(url)
-                                        .headers(self.headers.clone())));
+                                                .headers(self.headers.clone())));
         Attachment::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -631,8 +634,8 @@ impl Challonge {
                            match_id.0);
         let body = pairs_to_string(at_to_pairs(attachment));
         let response = try!(retry(|| self.client.post(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                                .headers(self.headers.clone())
+                                                .body(&body)));
         Attachment::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -649,8 +652,8 @@ impl Challonge {
                            attachment_id.0);
         let body = pairs_to_string(at_to_pairs(attachment));
         let response = try!(retry(|| self.client.put(url)
-                                        .headers(self.headers.clone())
-                                        .body(&body)));
+                                                .headers(self.headers.clone())
+                                                .body(&body)));
         Attachment::decode(try!(serde_json::from_reader(response)))
     }
 
@@ -665,7 +668,7 @@ impl Challonge {
                            match_id.0,
                            attachment_id.0);
         let _ = try!(retry(|| self.client.delete(url)
-                                        .headers(self.headers.clone())));
+                                         .headers(self.headers.clone())));
         Ok(())
     }
 
