@@ -6,7 +6,7 @@ authors = ["Victor Polevoy <maintainer@vpolevoy.com>"]
 description = "Client library for the Challonge REST API"
 readme = "README.md"
 license = "MIT"
-keywords = ["challonge", "tourney", "tournament", "api", "system"]
+keywords = ["game", "challonge", "tourney", "tournament", "api", "system"]
 
 repository = "https://github.com/vityafx/challonge-rs"
 documentation = "https://vityafx.github.io/challonge-rs/0.4.0/challonge/"
