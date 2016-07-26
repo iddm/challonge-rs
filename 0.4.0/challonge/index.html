@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `challonge` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, challonge">
+
+    <title>challonge - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'challonge', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>challonge</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/challonge/src/lib.rs.html#1-721' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Client library for the <a href="https://challonge.com">Challonge</a> REST API.</p>
+
+<p>Log in to Challonge with <code>Challonge::new</code>.
+Call API methods to interact with the service.</p>
+
+<p>For Challonge API documentation <a href="http://api.challonge.com/ru/v1/documents">look here</a>.</p>
+
+<p>For examples, see the <code>examples</code> directory in the source tree.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use tournament::{<a class='struct' href='../challonge/tournament/struct.Tournament.html' title='challonge::tournament::Tournament'>Tournament</a>, <a class='enum' href='../challonge/tournament/enum.TournamentId.html' title='challonge::tournament::TournamentId'>TournamentId</a>, <a class='struct' href='../challonge/tournament/struct.TournamentCreate.html' title='challonge::tournament::TournamentCreate'>TournamentCreate</a>, <a class='enum' href='../challonge/tournament/enum.TournamentState.html' title='challonge::tournament::TournamentState'>TournamentState</a>, <a class='enum' href='../challonge/tournament/enum.TournamentType.html' title='challonge::tournament::TournamentType'>TournamentType</a>, <a class='enum' href='../challonge/tournament/enum.TournamentIncludes.html' title='challonge::tournament::TournamentIncludes'>TournamentIncludes</a>, <a class='struct' href='../challonge/tournament/struct.Index.html' title='challonge::tournament::Index'>Index</a> as TournamentIndex};</code></td></tr><tr><td><code>pub use participants::{<a class='struct' href='../challonge/participants/struct.Participant.html' title='challonge::participants::Participant'>Participant</a>, <a class='struct' href='../challonge/participants/struct.ParticipantCreate.html' title='challonge::participants::ParticipantCreate'>ParticipantCreate</a>, <a class='struct' href='../challonge/participants/struct.ParticipantId.html' title='challonge::participants::ParticipantId'>ParticipantId</a>, <a class='struct' href='../challonge/participants/struct.Index.html' title='challonge::participants::Index'>Index</a> as ParticipantIndex};</code></td></tr><tr><td><code>pub use matches::{<a class='struct' href='../challonge/matches/struct.Match.html' title='challonge::matches::Match'>Match</a>, <a class='struct' href='../challonge/matches/struct.MatchScore.html' title='challonge::matches::MatchScore'>MatchScore</a>, <a class='struct' href='../challonge/matches/struct.MatchScores.html' title='challonge::matches::MatchScores'>MatchScores</a>, <a class='enum' href='../challonge/matches/enum.MatchState.html' title='challonge::matches::MatchState'>MatchState</a>, <a class='struct' href='../challonge/matches/struct.MatchUpdate.html' title='challonge::matches::MatchUpdate'>MatchUpdate</a>, <a class='struct' href='../challonge/matches/struct.MatchId.html' title='challonge::matches::MatchId'>MatchId</a>, <a class='struct' href='../challonge/matches/struct.Index.html' title='challonge::matches::Index'>Index</a> as MatchIndex};</code></td></tr><tr><td><code>pub use attachments::{<a class='struct' href='../challonge/attachments/struct.AttachmentId.html' title='challonge::attachments::AttachmentId'>AttachmentId</a>, <a class='struct' href='../challonge/attachments/struct.Attachment.html' title='challonge::attachments::Attachment'>Attachment</a>, <a class='struct' href='../challonge/attachments/struct.AttachmentCreate.html' title='challonge::attachments::AttachmentCreate'>AttachmentCreate</a>, <a class='struct' href='../challonge/attachments/struct.Index.html' title='challonge::attachments::Index'>Index</a> as AttachmentIndex};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='attachments/index.html'
+                                  title='challonge::attachments'>attachments</a></td>
+                           <td class='docblock short'>
+                                <p>Challonge Attachment type.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='error/index.html'
+                                  title='challonge::error'>error</a></td>
+                           <td class='docblock short'>
+                                <p>Challonge REST API error type.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='matches/index.html'
+                                  title='challonge::matches'>matches</a></td>
+                           <td class='docblock short'>
+                                <p>Challonge Match type.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='participants/index.html'
+                                  title='challonge::participants'>participants</a></td>
+                           <td class='docblock short'>
+                                <p>Challonge Participant type.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='tournament/index.html'
+                                  title='challonge::tournament'>tournament</a></td>
+                           <td class='docblock short'>
+                                <p>Challonge Tournament type.</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Challonge.html'
+                                  title='challonge::Challonge'>Challonge</a></td>
+                           <td class='docblock short'>
+                                <p>Client for the Challonge REST API.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "challonge";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
