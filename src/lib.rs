@@ -40,6 +40,8 @@ pub use participants::{
 };
 pub use matches::{
     Match,
+    MatchScore,
+    MatchScores,
     MatchState,
     MatchUpdate,
     MatchId,
@@ -204,9 +206,7 @@ fn mu_to_pairs(mu: &MatchUpdate) -> FieldPairs {
     if let Some(v) = mu.player2_votes {
         params.push((m!("player2_votes"), v.to_string()));
     }
-    if !mu.scores_csv.is_empty() {
-        params.push((m!("scores_csv"), mu.scores_csv.clone()));
-    }
+    params.push((m!("scores_csv"), mu.scores_csv.to_string()));
     if let Some(w) = mu.winner_id.as_ref() {
         params.push((m!("winner_id"), w.0.to_string()));
     }

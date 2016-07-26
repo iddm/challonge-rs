@@ -47,9 +47,7 @@ impl fmt::Display for MatchScore {
 
 /// A list of scores.
 #[derive(Debug, Clone)]
-pub struct MatchScores {
-    scores: Vec<MatchScore>,
-}
+pub struct MatchScores(pub Vec<MatchScore>);
 impl MatchScores {
     /// Decodes `MatchScores` from JSON.
     pub fn decode(string: String) -> MatchScores {
@@ -60,16 +58,14 @@ impl MatchScores {
                 scores.push(ms);
             }
         }
-        MatchScores {
-            scores: scores,
-        }
+        MatchScores(scores)
     }
 }
 impl fmt::Display for MatchScores {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let mut scores = String::new();
         let mut sep = "";
-        for s in &self.scores {
+        for s in &self.0 {
             scores.push_str(&format!("{}{}", sep, s.to_string()));
             sep = ",";
         }
@@ -152,7 +148,7 @@ impl Index {
 /// NOTE: If you're updating winner_id, scores_csv must also be provided. You may, however, update score_csv without providing winner_id for live score updates.
 pub struct MatchUpdate {
     /// Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
-    pub scores_csv: String,
+    pub scores_csv: MatchScores,
 
     /// The participant ID of the winner or "tie" if applicable (Round Robin and Swiss).
     /// NOTE: If you change the outcome of a completed match, all matches in the bracket that branch from the updated match will be reset.
@@ -168,14 +164,14 @@ impl MatchUpdate {
     /// Creates new `MatchUpdate` structure with default values.
     pub fn new() -> MatchUpdate {
         MatchUpdate {
-            scores_csv: String::default(),
+            scores_csv: MatchScores(Vec::default()),
             winner_id: None,
             player1_votes: None,
             player2_votes: None,
         }
     }
 
-    builder_s!(scores_csv);
+    builder!(scores_csv, MatchScores);
     builder_o!(winner_id, ParticipantId);
     builder_o!(player1_votes, u64);
     builder_o!(player2_votes, u64);
@@ -184,17 +180,21 @@ impl MatchUpdate {
 /// Player data in match.
 #[derive(Debug, Clone)]
 pub struct Player {
-    id: ParticipantId,
-    is_prereq_match_loser: bool,
-    prereq_match_id: Option<MatchId>,
-    votes: u64
+    /// Unique participant identifier
+    pub id: ParticipantId,
+    /// ???
+    pub is_prereq_match_loser: bool,
+    /// ???
+    pub prereq_match_id: Option<MatchId>,
+    /// Number of votes to the user.
+    pub votes: u64
 }
 impl Player {
     /// Decodes `Player` from JSON
     pub fn decode(mut map: &mut BTreeMap<String, Value>, prefix: &str) -> Result<Player, Error> {
         Ok(Player {
-            id: ParticipantId(try!(remove(&mut map, &format!("{}id", prefix))).as_u64().unwrap()),
-            is_prereq_match_loser: try!(remove(&mut map, &format!("{}is_prereq_match_loser", prefix))).as_boolean().unwrap(),
+            id: ParticipantId(try!(remove(&mut map, &format!("{}id", prefix))).as_u64().unwrap_or(0)),
+            is_prereq_match_loser: try!(remove(&mut map, &format!("{}is_prereq_match_loser", prefix))).as_boolean().unwrap_or(false),
             prereq_match_id: try!(remove(&mut map, &format!("{}prereq_match_id", prefix)))
                 .as_u64().map_or(None, |i| Some(MatchId(i))),
             votes: try!(remove(&mut map, &format!("{}votes", prefix))).as_u64().unwrap_or(0),
@@ -388,8 +388,8 @@ mod tests {
                     MatchScore(3, 1),
                     MatchScore(3, 2),
                 ];
-                assert_eq!(m.scores_csv.scores.len(), 2);
-                let mut iter = m.scores_csv.scores.iter().zip(correct_scores.iter());
+                assert_eq!(m.scores_csv.0.len(), 2);
+                let mut iter = m.scores_csv.0.iter().zip(correct_scores.iter());
                 while let Some(pair) = iter.next() {
                     assert_eq!((pair.0).0, (pair.1).0);
                     assert_eq!((pair.1).1, (pair.1).1);
