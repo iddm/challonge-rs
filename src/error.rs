@@ -1,45 +1,87 @@
 //! Challonge REST API error type.
 
-extern crate hyper;
-extern crate serde_json;
-
+use std::fmt::Display;
+use std::error::Error as StdError;
 use serde_json::Error as JsonError;
+use chrono::format::ParseError;
+use reqwest::{ self, Error as ReqwestError };
+
+/// Challonge API `Result` alias type.
+pub type Result<T> = ::std::result::Result<T, Error>;
 
 /// Challonge REST API error type.
 #[derive(Debug)]
 pub enum Error {
-    /// A `hyper` crate error
-    Hyper(hyper::Error),
-
+    /// A `reqwest` crate error
+    Reqwest(reqwest::Error),
     /// A generic non-success response from the REST API
-    Status(hyper::status::StatusCode, Option<serde_json::Value>),
-
-
+    Status(::reqwest::StatusCode, String),
     /// A `serde_json` crate error
     Json(JsonError),
-
-
-    /// A json decoding error, with a description and the offending value
-    Decode(&'static str, serde_json::Value),
-
     /// Challonge-rs error.
     Api(&'static str),
+    /// A date parse error (`chrono` crate error)
+    Date(ParseError),
 }
-impl Error {
-    /// Creates a `Error` from `hyper`'s client response.
-    pub fn error_from_response(response: hyper::client::Response) -> Error {
-        let status = response.status;
-        let value = ::serde_json::from_reader(response).ok();
-        Error::Status(status, value)
+
+impl From<::reqwest::Response> for Error {
+    fn from(mut response: ::reqwest::Response) -> Error {
+        use std::io::Read;
+
+        let status = response.status().clone();
+        let mut body = String::new();
+        let _ = response.read_to_string(&mut body);
+        Error::Status(status, body)
     }
 }
-impl From<hyper::Error> for Error {
-    fn from(err: hyper::Error) -> Error {
-        Error::Hyper(err)
+
+impl From<ReqwestError> for Error {
+    fn from(err: ReqwestError) -> Error {
+        Error::Reqwest(err)
     }
 }
+
 impl From<JsonError> for Error {
     fn from(err: JsonError) -> Error {
         Error::Json(err)
+    }
+}
+
+impl From<ParseError> for Error {
+    fn from(err: ParseError) -> Error {
+        Error::Date(err)
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        match *self {
+            Error::Reqwest(ref inner) => inner.fmt(f),
+            Error::Json(ref inner) => inner.fmt(f),
+            Error::Date(ref inner) => inner.fmt(f),
+            _ => f.write_str(self.description()),
+        }
+    }
+}
+
+impl StdError for Error {
+    fn description(&self) -> &str {
+        match *self {
+            Error::Reqwest(ref inner) => inner.description(),
+            Error::Json(ref inner) => inner.description(),
+            Error::Date(ref inner) => inner.description(),
+            Error::Api(msg) => msg,
+            Error::Status(status, _) => status.canonical_reason()
+                                              .unwrap_or("Unknown bad HTTP status"),
+        }
+    }
+
+    fn cause(&self) -> Option<&StdError> {
+        match *self {
+            Error::Reqwest(ref inner) => Some(inner),
+            Error::Json(ref inner) => Some(inner),
+            Error::Date(ref inner) => Some(inner),
+            _ => None,
+        }
     }
 }

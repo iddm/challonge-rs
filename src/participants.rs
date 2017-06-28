@@ -1,11 +1,7 @@
 //! Challonge Participant type.
 
-extern crate serde_json;
-
-use serde_json::Value;
 use chrono::*;
 
-use util::{decode_array, into_map, remove};
 use error::Error;
 
 /// Represents an ID of a participant

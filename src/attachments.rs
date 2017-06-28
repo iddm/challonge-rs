@@ -1,12 +1,7 @@
 //! Challonge Attachment type.
 
-extern crate serde_json;
-
-use serde_json::Value;
 use chrono::*;
-use std::collections::BTreeMap;
 
-use util::{decode_array, into_map, remove};
 use matches::MatchId;
 use error::Error;
 
