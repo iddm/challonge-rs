@@ -16,5 +16,6 @@ reqwest = "0.6"
 serde = "1"
 serde_derive = "1"
 serde_json = "1"
+serde_urlencoded = "0.5"
 chrono = { version = "0.4", features = ["serde"] }
 log = "0.3"

@@ -14,6 +14,7 @@ extern crate log;
 extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
+extern crate serde_urlencoded;
 extern crate chrono;
 extern crate reqwest;
 
@@ -26,6 +27,7 @@ use reqwest::header::{ Basic, Authorization };
 mod macroses;
 mod endpoints;
 mod tournament;
+mod filters;
 // mod participants;
 // mod matches;
 // mod attachments;
@@ -33,9 +35,9 @@ pub mod error;
 pub use tournament::{
 //     Tournament,
     TournamentId,
-//     TournamentCreate,
-    // TournamentState,
-    // TournamentType,
+    TournamentCreate,
+    TournamentState,
+    TournamentType,
     TournamentIncludes,
     // Index as TournamentIndex,
 };
@@ -171,47 +173,6 @@ fn retry<F: Fn() -> reqwest::RequestBuilder>(f: F) -> Result<reqwest::Response> 
 //     params
 // }
 //
-// fn tc_to_pairs(tournament: &TournamentCreate) -> FieldPairs {
-//     let mut params = vec![
-//         (t!("name"), tournament.name.clone()),
-//         (t!("tournament_type"), tournament.tournament_type.to_string()),
-//         (t!("url"), tournament.url.clone()),
-//         (t!("subdomain"), tournament.subdomain.clone()),
-//         (t!("description"), tournament.description.clone()),
-//         (t!("open_signup"), tournament.open_signup.to_string()),
-//         (t!("hold_third_place_match"), tournament.hold_third_place_match.to_string()),
-//         (t!("pts_for_match_win"), tournament.swiss_points.match_win.to_string()),
-//         (t!("pts_for_match_tie"), tournament.swiss_points.match_tie.to_string()),
-//         (t!("pts_for_game_win"), tournament.swiss_points.game_win.to_string()),
-//         (t!("pts_for_game_tie"), tournament.swiss_points.game_tie.to_string()),
-//         (t!("swiss_rounds"), tournament.swiss_rounds.to_string()),
-//         (t!("ranked_by"), tournament.ranked_by.to_string()),
-//         (t!("rr_pts_for_match_win"), tournament.round_robin_points.match_win.to_string()),
-//         (t!("rr_pts_for_match_tie"), tournament.round_robin_points.match_tie.to_string()),
-//         (t!("rr_pts_for_game_win"), tournament.round_robin_points.game_win.to_string()),
-//         (t!("rr_pts_for_game_tie"), tournament.round_robin_points.game_tie.to_string()),
-//         (t!("show_rounds"), tournament.show_rounds.to_string()),
-//         (t!("private"), tournament.private.to_string()),
-//         (t!("notify_users_when_matches_open"), tournament.notify_users_when_matches_open.to_string()),
-//         (t!("notify_users_when_the_tournament_ends"), tournament.notify_users_when_the_tournament_ends.to_string()),
-//         (t!("sequential_pairings"), tournament.sequential_pairings.to_string()),
-//         (t!("signup_cap"), tournament.signup_cap.to_string()),
-//         (t!("check_in_duration"), tournament.check_in_duration.to_string()),
-//     ];
-//     if let Some(gfm) = tournament.grand_finals_modifier.as_ref() {
-//         params.push((t!("grand_finals_modifier"), gfm.clone()));
-//     }
-//     if let Some(start_at) = tournament.start_at.as_ref() {
-//         params.push((t!("start_at"), start_at.to_rfc3339()));
-//     }
-//     if let Some(s_bye_pts) = tournament.swiss_points.bye.as_ref() {
-//         params.push((t!("pts_for_bye"), s_bye_pts.to_string()));
-//     }
-//     if let Some(game) = tournament.game_name.as_ref() {
-//         params.push((t!("game_name"), game.clone()));
-//     }
-//     params
-// }
 //
 // fn mu_to_pairs(mu: &MatchUpdate) -> FieldPairs {
 //     let mut params = Vec::new();

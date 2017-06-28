@@ -9,6 +9,7 @@ use reqwest::{ self, Error as ReqwestError };
 /// Challonge API `Result` alias type.
 pub type Result<T> = ::std::result::Result<T, Error>;
 
+
 /// Challonge REST API error type.
 #[derive(Debug)]
 pub enum Error {
@@ -18,7 +19,9 @@ pub enum Error {
     Status(::reqwest::StatusCode, String),
     /// A `serde_json` crate error
     Json(JsonError),
-    /// Challonge-rs error.
+    /// A challonge validation error
+    ChallongeValidationErrors(Vec<String>),
+    /// Challonge-rs error
     Api(&'static str),
     /// A date parse error (`chrono` crate error)
     Date(ParseError),
@@ -28,9 +31,19 @@ impl From<::reqwest::Response> for Error {
     fn from(mut response: ::reqwest::Response) -> Error {
         use std::io::Read;
 
+        #[derive(Deserialize)]
+        struct ValidationErrorsWrapper {
+            errors: Vec<String>,
+        }
+
         let status = response.status().clone();
         let mut body = String::new();
         let _ = response.read_to_string(&mut body);
+        if status == ::reqwest::StatusCode::UnprocessableEntity {
+            if let Ok(value) = ::serde_json::from_str::<ValidationErrorsWrapper>(&body) {
+                return Error::ChallongeValidationErrors(value.errors)
+            }
+        }
         Error::Status(status, body)
     }
 }
