@@ -31,123 +31,47 @@ impl fmt::Display for MatchScore {
 }
 
 /// A list of scores.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MatchScores(pub Vec<MatchScore>);
-impl MatchScores {
-    /// Decodes `MatchScores` from JSON.
-    pub fn decode(string: String) -> MatchScores {
-        let mut scores = Vec::new();
-        let mut iter = string.split(",");
-        while let Some(s) = iter.next() {
-            if let Ok(ms) = MatchScore::decode(s.trim()) {
-                scores.push(ms);
-            }
-        }
-        MatchScores(scores)
-    }
-}
-impl fmt::Display for MatchScores {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let mut scores = String::new();
-        let mut sep = "";
-        for s in &self.0 {
-            scores.push_str(&format!("{}{}", sep, s.to_string()));
-            sep = ",";
-        }
-        try!(fmt.write_str(&scores));
-        Ok(())
-    }
-}
 
-/// Represents an ID of a match 
-#[derive(Debug, Clone, PartialEq)]
+/// Represents an ID of a match
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MatchId(pub u64);
 
-/// Current match state. 
+/// Current match state.
 #[derive(Debug, Clone, PartialEq)]
+#[serde(rename_all = "lowercase")]
 pub enum MatchState {
-    /// Any state of a match. 
+    /// Any state of a match.
     All,
-
     /// Match is in a pending state.
     Pending,
-
     /// Match is open.
     Open,
-
     /// Match is completed.
     Complete,
 }
-impl fmt::Display for MatchState {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            MatchState::All => {
-                try!(fmt.write_str("all"));
-            },
-            MatchState::Pending => {
-                try!(fmt.write_str("pending"));
-            },
-            MatchState::Open => {
-                try!(fmt.write_str("open"));
-            },
-            MatchState::Complete => {
-                try!(fmt.write_str("complete"));
-            },
-        }
-        Ok(())
-    }
-}
-impl FromStr for MatchState {
-    type Err = ();
-    fn from_str(s: &str) -> Result<MatchState, ()> {
-        match s {
-            "all" => return Ok(MatchState::All),
-            "pending" => return Ok(MatchState::Pending),
-            "open" => return Ok(MatchState::Open),
-            "complete" => return Ok(MatchState::Complete),
-            _ => Err(()),
-        }
-    }
-}
 
-/// A list of matches of the tournament. 
-#[allow(dead_code)]
-#[derive(Debug, Clone)]
+/// A list of matches of the tournament.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Index(pub Vec<Match>);
-impl Index {
-    /// Decodes match index from JSON.
-    pub fn decode(value: Value) -> Result<Index, Error> {
-        Ok(Index(try!(decode_array(value, Match::decode))))
-    }
-}
 
-#[derive(Debug, Clone)]
-/// NOTE: If you're updating winner_id, scores_csv must also be provided. You may, however, update score_csv without providing winner_id for live score updates.
+
+/// NOTE: If you're updating winner_id, scores_csv must also be provided. You may, however, update
+/// score_csv without providing winner_id for live score updates.
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct MatchUpdate {
     /// Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
     pub scores_csv: MatchScores,
-
     /// The participant ID of the winner or "tie" if applicable (Round Robin and Swiss).
     /// NOTE: If you change the outcome of a completed match, all matches in the bracket that branch from the updated match will be reset.
     pub winner_id: Option<ParticipantId>,
-    
     /// Overwrites the number of votes for player 1
     pub player1_votes: Option<u64>,
-
     /// Overwrites the number of votes for player 2
     pub player2_votes: Option<u64>,
 }
 impl MatchUpdate {
-    /// Creates new `MatchUpdate` structure with default values.
-    pub fn new() -> MatchUpdate {
-        MatchUpdate {
-            scores_csv: MatchScores(Vec::default()),
-            winner_id: None,
-            player1_votes: None,
-            player2_votes: None,
-        }
-    }
-
     builder!(scores_csv, MatchScores);
     builder_o!(winner_id, ParticipantId);
     builder_o!(player1_votes, u64);
@@ -155,7 +79,7 @@ impl MatchUpdate {
 }
 
 /// Player data in match.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Player {
     /// Unique participant identifier
     pub id: ParticipantId,
@@ -180,53 +104,42 @@ impl Player {
 }
 
 /// Challonge `Match` definition.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Match {
     // attachment_count: ,
     /// Holds a time when match was created.
     pub created_at: DateTime<FixedOffset>,
     // group_id: ,
-    
-    /// Does the match has an attachment? 
+    /// Does the match has an attachment?
     pub has_attachment: bool,
-
-    /// Unique Match identifier 
+    /// Unique Match identifier
     pub id: MatchId,
-
-    /// ??? 
+    /// ???
     pub identifier: String,
-    // location: 
-    /// An id of user which lost the match 
+    // location:
+    /// An id of user which lost the match
     pub loser_id: Option<ParticipantId>,
-
-    /// Information about first player 
+    /// Information about first player
     pub player1: Player,
-
-    /// Information about second player 
+    /// Information about second player
     pub player2: Player,
-
     /// Number of current round of the match.
     pub round: u64,
     // // // scheduled_time:
     /// Holds a time when match was started.
     pub started_at: Option<DateTime<FixedOffset>>,
-
-    /// State of the match. 
+    /// State of the match.
     pub state: MatchState,
-
-    /// Id of a tournament to which this match belongs. 
+    /// Id of a tournament to which this match belongs.
     pub tournament_id: TournamentId,
-    // // underway_at: 
-    /// A time when match was updated last time. 
+    // // underway_at:
+    /// A time when match was updated last time.
     pub updated_at: DateTime<FixedOffset>,
-
-    /// An id of user which won the match 
+    /// An id of user which won the match
     pub winner_id: Option<ParticipantId>,
-
-    /// ??? 
+    /// ???
     pub prerequisite_match_ids_csv: String,
-
-    /// Match scores (pairs of score for first and second player) 
+    /// Match scores (pairs of score for first and second player)
     pub scores_csv: MatchScores,
 }
 impl Match {
