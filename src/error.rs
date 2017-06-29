@@ -84,6 +84,7 @@ impl StdError for Error {
             Error::Json(ref inner) => inner.description(),
             Error::Date(ref inner) => inner.description(),
             Error::Api(msg) => msg,
+            Error::ChallongeValidationErrors(_) => "Challonge validation errors",
             Error::Status(status, _) => status.canonical_reason()
                                               .unwrap_or("Unknown bad HTTP status"),
         }

@@ -7,8 +7,8 @@ use ::*;
 pub struct TournamentIndexFilter {
     state: TournamentState,
     tournament_type: TournamentType,
-    created_after: Date<Utc>,
-    created_before: Date<Utc>,
+    created_after: NaiveDate,
+    created_before: NaiveDate,
     subdomain: String,
 }
 // impl Default for TournamentIndexFilter {

@@ -46,13 +46,13 @@ pub enum RankedBy {
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum TournamentType {
     /// [Single elimination system](https://en.wikipedia.org/wiki/Single-elimination_tournament)
-    #[serde(rename = "single_elimination")]
+    #[serde(rename = "single elimination")]
     SingleElimination,
     /// [Double elimination system](https://en.wikipedia.org/wiki/Double-elimination_tournament)
-    #[serde(rename = "double_elimination")]
+    #[serde(rename = "double elimination")]
     DoubleElimination,
     /// [Round robin tournament system](https://en.wikipedia.org/wiki/Round-robin_tournament)
-    #[serde(rename = "round_robin")]
+    #[serde(rename = "round robin")]
     RoundRobin,
     /// [Swiss tournament system](https://en.wikipedia.org/wiki/Swiss-system_tournament)
     #[serde(rename = "swiss")]
@@ -300,9 +300,8 @@ impl TournamentCreate {
     builder!(grand_finals_modifier, Option<String>);
 }
 
-/*
 /// Challonge `Tournament` definition.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Tournament {
     /// Tournament may have attachments
     pub accept_attachments: bool,
@@ -352,15 +351,19 @@ pub struct Tournament {
     pub private: bool,
     /// ???
     pub progress_meter: u64,
+    /*
     /// A points for matches/games in swiss system
-    pub swiss_points: GamePoints,
+    pub swiss_points: SwissGamePoints,
+    */
     /// ???
     pub quick_advance: bool,
     // <ranked-by>match wins</ranked-by>
     /// Tournament will require score agreement from all of participants of the match
     pub require_score_agreement: bool,
+    /*
     /// A points for matches/games in round robin system
-    pub round_robin_points: GamePoints,
+    pub round_robin_points: RoundRobinGamePoints,
+    */
     /// ???
     pub sequential_pairings: bool,
     /// Show rounds on the web page
@@ -410,71 +413,9 @@ pub struct Tournament {
     /// Are the group stages were started already
     pub group_stages_were_started: bool,
 }
-impl Tournament {
-    /// Decodes `Tournament` from JSON.
-    pub fn decode(value: Value) -> Result<Tournament, Error> {
-        let mut value = try!(into_map(value));
-        let t = try!(remove(&mut value, "tournament"));
-        let mut tv = try!(into_map(t));
-
-        let mut started_at = None;
-        if let Some(dt_str) = try!(remove(&mut tv, "started_at")).as_string() {
-            if let Ok(dt) = DateTime::parse_from_rfc3339(dt_str) {
-                started_at = Some(dt);
-            }
-        }
-
-        Ok(Tournament {
-            accept_attachments: try!(remove(&mut tv, "accept_attachments")).as_boolean().unwrap_or(false),
-            allow_participant_match_reporting: try!(remove(&mut tv, "allow_participant_match_reporting")).as_boolean().unwrap_or(false),
-            anonymous_voting: try!(remove(&mut tv, "anonymous_voting")).as_boolean().unwrap_or(false),
-            created_at: DateTime::parse_from_rfc3339(try!(remove(&mut tv, "created_at")).as_string().unwrap_or("")).unwrap(),
-            created_by_api: try!(remove(&mut tv, "created_by_api")).as_boolean().unwrap_or(false),
-            credit_capped: try!(remove(&mut tv, "credit_capped")).as_boolean().unwrap_or(false),
-            description: try!(remove(&mut tv, "description")).as_string().unwrap_or("").to_string(),
-            game_id: try!(remove(&mut tv, "game_id")).as_u64().unwrap_or(0),
-            id: TournamentId::Id(try!(remove(&mut tv, "id")).as_u64().unwrap_or(0)),
-            name: try!(remove(&mut tv, "name")).as_string().unwrap_or("").to_string(),
-            group_stages_enabled: try!(remove(&mut tv, "group_stages_enabled")).as_boolean().unwrap_or(false),
-            hide_forum: try!(remove(&mut tv, "hide_forum")).as_boolean().unwrap_or(false),
-            hide_seeds: try!(remove(&mut tv, "hide_seeds")).as_boolean().unwrap_or(false),
-            hold_third_place_match: try!(remove(&mut tv, "hold_third_place_match")).as_boolean().unwrap_or(false),
-            max_predictions_per_user: try!(remove(&mut tv, "max_predictions_per_user")).as_u64().unwrap_or(0),
-            notify_users_when_matches_open: try!(remove(&mut tv, "notify_users_when_matches_open")).as_boolean().unwrap_or(false),
-            notify_users_when_the_tournament_ends: try!(remove(&mut tv, "notify_users_when_the_tournament_ends")).as_boolean().unwrap_or(false),
-            open_signup: try!(remove(&mut tv, "open_signup")).as_boolean().unwrap_or(false),
-            participants_count: try!(remove(&mut tv, "participants_count")).as_u64().unwrap_or(0),
-            prediction_method: try!(remove(&mut tv, "prediction_method")).as_u64().unwrap_or(0),
-            private: try!(remove(&mut tv, "private")).as_boolean().unwrap_or(false),
-            progress_meter: try!(remove(&mut tv, "progress_meter")).as_u64().unwrap_or(0),
-            swiss_points: GamePoints::decode(&mut tv, "").unwrap(),
-            quick_advance: try!(remove(&mut tv, "quick_advance")).as_boolean().unwrap_or(false),
-            require_score_agreement: try!(remove(&mut tv, "require_score_agreement")).as_boolean().unwrap_or(false),
-            round_robin_points: GamePoints::decode(&mut tv, "rr_").unwrap(),
-            sequential_pairings: try!(remove(&mut tv, "sequential_pairings")).as_boolean().unwrap_or(false),
-            show_rounds: try!(remove(&mut tv, "show_rounds")).as_boolean().unwrap_or(false),
-            started_at: started_at,
-            swiss_rounds: try!(remove(&mut tv, "swiss_rounds")).as_u64().unwrap_or(0),
-            teams: try!(remove(&mut tv, "teams")).as_boolean().unwrap_or(false),
-            tournament_type: TournamentType::from_str(try!(remove(&mut tv, "tournament_type")).as_string().unwrap_or("")).unwrap_or(TournamentType::SingleElimination),
-            updated_at: DateTime::parse_from_rfc3339(try!(remove(&mut tv, "updated_at")).as_string().unwrap()).unwrap(),
-            url: try!(remove(&mut tv, "url")).as_string().unwrap_or("").to_string(),
-            description_source: try!(remove(&mut tv, "description_source")).as_string().unwrap_or("").to_string(),
-            full_challonge_url: try!(remove(&mut tv, "full_challonge_url")).as_string().unwrap_or("").to_string(),
-            live_image_url: try!(remove(&mut tv, "live_image_url")).as_string().unwrap_or("").to_string(),
-            review_before_finalizing: try!(remove(&mut tv, "review_before_finalizing")).as_boolean().unwrap_or(false),
-            accepting_predictions: try!(remove(&mut tv, "accepting_predictions")).as_boolean().unwrap_or(false),
-            participants_locked: try!(remove(&mut tv, "participants_locked")).as_boolean().unwrap_or(false),
-            game_name: try!(remove(&mut tv, "game_name")).as_string().unwrap_or("").to_string(),
-            participants_swappable: try!(remove(&mut tv, "participants_swappable")).as_boolean().unwrap_or(false),
-            team_convertable: try!(remove(&mut tv, "team_convertable")).as_boolean().unwrap_or(false),
-            group_stages_were_started: try!(remove(&mut tv, "group_stages_were_started")).as_boolean().unwrap_or(false),
-        })
-    }
-}
 
 /// A list of tournaments of the account/organization.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Index(pub Vec<Tournament>);
 
 #[cfg(test)]
@@ -485,7 +426,6 @@ mod tests {
     #[test]
     fn test_tournament_parse() {
         let string = r#"{
-          "tournament": {
             "accept_attachments": false,
             "allow_participant_match_reporting": true,
             "anonymous_voting": false,
@@ -553,72 +493,63 @@ mod tests {
             "participants_swappable": false,
             "team_convertable": false,
             "group_stages_were_started": false
-          }
         }"#;
-        let json_r = serde_json::from_str(string);
-        assert!(json_r.is_ok());
-        let json = json_r.unwrap();
-        if let Ok(t) = Tournament::decode(json) {
-            assert_eq!(t.accept_attachments, false);
-            assert_eq!(t.allow_participant_match_reporting, true);
-            assert_eq!(t.anonymous_voting, false);
-            // assert_eq!(t.created_at, DateTime<);
-            assert_eq!(t.created_by_api, false);
-            assert_eq!(t.description, "sample description");
-            assert_eq!(t.credit_capped, false);
-            assert_eq!(t.game_id, 600);
-            if let TournamentId::Id(num) = t.id {
-                assert_eq!(num, 1086875);
-            } else {
-                // Id should be parsed as numeric variable here.
-                assert!(false);
-            }
-            assert_eq!(t.name, "Sample Tournament 1");
-            assert_eq!(t.group_stages_enabled, false);
-            assert_eq!(t.hide_forum, false);
-            assert_eq!(t.hide_seeds, false);
-            assert_eq!(t.hold_third_place_match, false);
-            assert_eq!(t.max_predictions_per_user, 1);
-            assert_eq!(t.notify_users_when_matches_open, true);
-            assert_eq!(t.notify_users_when_the_tournament_ends, true);
-            assert_eq!(t.open_signup, false);
-            assert_eq!(t.participants_count, 4);
-            assert_eq!(t.prediction_method, 0);
-            assert_eq!(t.private, false);
-            assert_eq!(t.progress_meter, 0);
-            assert_eq!(t.swiss_points.bye, Some(1.0f64));
-            assert_eq!(t.swiss_points.game_tie, 0.0f64);
-            assert_eq!(t.swiss_points.game_win, 0.0f64);
-            assert_eq!(t.swiss_points.match_tie, 0.5f64);
-            assert_eq!(t.swiss_points.match_win, 1.0f64);
-            assert_eq!(t.quick_advance, false);
-            assert_eq!(t.require_score_agreement, false);
-            assert_eq!(t.round_robin_points.game_tie, 0.0f64);
-            assert_eq!(t.round_robin_points.game_win, 0.0f64);
-            assert_eq!(t.round_robin_points.match_tie, 0.5f64);
-            assert_eq!(t.round_robin_points.match_win, 1.0f64);
-            assert_eq!(t.sequential_pairings, false);
-            assert_eq!(t.show_rounds, true);
-            // assert_eq!(t.started_at, DateTime<);
-            assert_eq!(t.swiss_rounds, 0);
-            assert_eq!(t.teams, false);
-            assert_eq!(t.tournament_type, TournamentType::SingleElimination);
-            // assert_eq!(t.updated_at, DateTime<);
-            assert_eq!(t.url, "sample_tournament_1");
-            assert_eq!(t.description_source, "sample description source");
-            assert_eq!(t.full_challonge_url, "http://challonge.com/sample_tournament_1");
-            assert_eq!(t.live_image_url, "http://images.challonge.com/sample_tournament_1.png");
-            assert_eq!(t.review_before_finalizing, true);
-            assert_eq!(t.accepting_predictions, false);
-            assert_eq!(t.participants_locked, true);
-            assert_eq!(t.game_name, "Table Tennis");
-            assert_eq!(t.participants_swappable, false);
-            assert_eq!(t.team_convertable, false);
-            assert_eq!(t.group_stages_were_started, false);
+        let t: Tournament = serde_json::from_str(string).unwrap();
+        assert_eq!(t.accept_attachments, false);
+        assert_eq!(t.allow_participant_match_reporting, true);
+        assert_eq!(t.anonymous_voting, false);
+        // assert_eq!(t.created_at, DateTime<);
+        assert_eq!(t.created_by_api, false);
+        assert_eq!(t.description, "sample description");
+        assert_eq!(t.credit_capped, false);
+        assert_eq!(t.game_id, 600);
+        if let TournamentId::Id(num) = t.id {
+            assert_eq!(num, 1086875);
         } else {
+            // Id should be parsed as numeric variable here.
             assert!(false);
         }
+        assert_eq!(t.name, "Sample Tournament 1");
+        assert_eq!(t.group_stages_enabled, false);
+        assert_eq!(t.hide_forum, false);
+        assert_eq!(t.hide_seeds, false);
+        assert_eq!(t.hold_third_place_match, false);
+        assert_eq!(t.max_predictions_per_user, 1);
+        assert_eq!(t.notify_users_when_matches_open, true);
+        assert_eq!(t.notify_users_when_the_tournament_ends, true);
+        assert_eq!(t.open_signup, false);
+        assert_eq!(t.participants_count, 4);
+        assert_eq!(t.prediction_method, 0);
+        assert_eq!(t.private, false);
+        assert_eq!(t.progress_meter, 0);
+        // assert_eq!(t.swiss_points.bye, Some(1.0f64));
+        // assert_eq!(t.swiss_points.game_tie, 0.0f64);
+        // assert_eq!(t.swiss_points.game_win, 0.0f64);
+        // assert_eq!(t.swiss_points.match_tie, 0.5f64);
+        // assert_eq!(t.swiss_points.match_win, 1.0f64);
+        assert_eq!(t.quick_advance, false);
+        assert_eq!(t.require_score_agreement, false);
+        // assert_eq!(t.round_robin_points.game_tie, 0.0f64);
+        // assert_eq!(t.round_robin_points.game_win, 0.0f64);
+        // assert_eq!(t.round_robin_points.match_tie, 0.5f64);
+        // assert_eq!(t.round_robin_points.match_win, 1.0f64);
+        assert_eq!(t.sequential_pairings, false);
+        assert_eq!(t.show_rounds, true);
+        // assert_eq!(t.started_at, DateTime<);
+        assert_eq!(t.swiss_rounds, 0);
+        assert_eq!(t.teams, false);
+        assert_eq!(t.tournament_type, TournamentType::SingleElimination);
+        // assert_eq!(t.updated_at, DateTime<);
+        assert_eq!(t.url, "sample_tournament_1");
+        assert_eq!(t.description_source, "sample description source");
+        assert_eq!(t.full_challonge_url, "http://challonge.com/sample_tournament_1");
+        assert_eq!(t.live_image_url, "http://images.challonge.com/sample_tournament_1.png");
+        assert_eq!(t.review_before_finalizing, true);
+        assert_eq!(t.accepting_predictions, false);
+        assert_eq!(t.participants_locked, true);
+        assert_eq!(t.game_name, "Table Tennis");
+        assert_eq!(t.participants_swappable, false);
+        assert_eq!(t.team_convertable, false);
+        assert_eq!(t.group_stages_were_started, false);
     }
 }
-
-*/
