@@ -420,8 +420,9 @@ pub struct Index(pub Vec<Tournament>);
 
 #[cfg(test)]
 mod tests {
-    extern crate serde_json;
+    use serde_json;
     use tournament::{ Tournament, TournamentType, TournamentId };
+    use chrono::{ Datelike, Timelike };
 
     #[test]
     fn test_tournament_parse() {
@@ -498,7 +499,12 @@ mod tests {
         assert_eq!(t.accept_attachments, false);
         assert_eq!(t.allow_participant_match_reporting, true);
         assert_eq!(t.anonymous_voting, false);
-        // assert_eq!(t.created_at, DateTime<);
+        assert_eq!(t.created_at.year(), 2015);
+        assert_eq!(t.created_at.month(), 1);
+        assert_eq!(t.created_at.day(), 19);
+        assert_eq!(t.created_at.hour(), 16);
+        assert_eq!(t.created_at.minute(), 47);
+        assert_eq!(t.created_at.second(), 30);
         assert_eq!(t.created_by_api, false);
         assert_eq!(t.description, "sample description");
         assert_eq!(t.credit_capped, false);
@@ -535,11 +541,22 @@ mod tests {
         // assert_eq!(t.round_robin_points.match_win, 1.0f64);
         assert_eq!(t.sequential_pairings, false);
         assert_eq!(t.show_rounds, true);
-        // assert_eq!(t.started_at, DateTime<);
+        let started_at = t.started_at.unwrap();
+        assert_eq!(started_at.year(), 2015);
+        assert_eq!(started_at.month(), 1);
+        assert_eq!(started_at.day(), 19);
+        assert_eq!(started_at.hour(), 16);
+        assert_eq!(started_at.minute(), 57);
+        assert_eq!(started_at.second(), 17);
         assert_eq!(t.swiss_rounds, 0);
         assert_eq!(t.teams, false);
         assert_eq!(t.tournament_type, TournamentType::SingleElimination);
-        // assert_eq!(t.updated_at, DateTime<);
+        assert_eq!(t.updated_at.year(), 2015);
+        assert_eq!(t.updated_at.month(), 1);
+        assert_eq!(t.updated_at.day(), 19);
+        assert_eq!(t.updated_at.hour(), 16);
+        assert_eq!(t.updated_at.minute(), 57);
+        assert_eq!(t.updated_at.second(), 17);
         assert_eq!(t.url, "sample_tournament_1");
         assert_eq!(t.description_source, "sample description source");
         assert_eq!(t.full_challonge_url, "http://challonge.com/sample_tournament_1");
