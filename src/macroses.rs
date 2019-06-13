@@ -1,37 +1,37 @@
 macro_rules! format_date {
     ($date:expr) => {
         $date.format("%Y-%m-%d").to_string()
-    }
+    };
 }
 
 macro_rules! t {
     ($key:expr) => {
         concat!("tournament[", $key, "]")
-    }
+    };
 }
 
 macro_rules! p {
     ($key:expr) => {
         concat!("participant[", $key, "]")
-    }
+    };
 }
 
 macro_rules! a {
     ($key:expr) => {
         concat!("match_attachment[", $key, "]")
-    }
+    };
 }
 
 macro_rules! ps {
     ($key:expr) => {
         concat!("participant[][", $key, "]")
-    }
+    };
 }
 
 macro_rules! m {
     ($key:expr) => {
         concat!("match[", $key, "]")
-    }
+    };
 }
 
 macro_rules! builder {
@@ -77,4 +77,3 @@ macro_rules! builder_so {
         }
     };
 }
-

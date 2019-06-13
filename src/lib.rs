@@ -10,90 +10,63 @@
 
 #[macro_use]
 extern crate log;
+extern crate chrono;
 extern crate hyper;
 extern crate serde_json;
-extern crate chrono;
 
 use chrono::date::Date;
 use chrono::offset::local::Local;
 #[macro_use]
 mod macroses;
-mod util;
-pub mod tournament;
-pub mod participants;
+pub mod attachments;
 pub mod error;
 pub mod matches;
-pub mod attachments;
-pub use tournament::{
-    Tournament,
-    TournamentId,
-    TournamentCreate,
-    TournamentState,
-    TournamentType,
-    TournamentIncludes,
-    Index as TournamentIndex,
-};
-pub use participants::{
-    Participant,
-    ParticipantCreate,
-    ParticipantId,
-    Index as ParticipantIndex,
-};
-pub use matches::{
-    Match,
-    MatchScore,
-    MatchScores,
-    MatchState,
-    MatchUpdate,
-    MatchId,
-    Index as MatchIndex,
-};
-pub use attachments::{
-    AttachmentId,
-    Attachment,
-    AttachmentCreate,
-    Index as AttachmentIndex,
-};
+pub mod participants;
+pub mod tournament;
+mod util;
+pub use attachments::{Attachment, AttachmentCreate, AttachmentId, Index as AttachmentIndex};
 use error::Error;
-
+pub use matches::{
+    Index as MatchIndex, Match, MatchId, MatchScore, MatchScores, MatchState, MatchUpdate,
+};
+pub use participants::{Index as ParticipantIndex, Participant, ParticipantCreate, ParticipantId};
+pub use tournament::{
+    Index as TournamentIndex, Tournament, TournamentCreate, TournamentId, TournamentIncludes,
+    TournamentState, TournamentType,
+};
 
 const API_BASE: &'static str = "https://api.challonge.com/v1";
 
-
-
-fn check_status(response: hyper::Result<hyper::client::Response>)
-    -> Result<hyper::client::Response, Error> {
+fn check_status(
+    response: hyper::Result<hyper::client::Response>,
+) -> Result<hyper::client::Response, Error> {
     let response = try!(response);
     if !response.status.is_success() {
-        return Err(Error::error_from_response(response))
+        return Err(Error::error_from_response(response));
     }
     Ok(response)
 }
 
-fn retry<'a, F: Fn() -> hyper::client::RequestBuilder<'a>>(f: F)
-    -> Result<hyper::client::Response, Error> {
+fn retry<'a, F: Fn() -> hyper::client::RequestBuilder<'a>>(
+    f: F,
+) -> Result<hyper::client::Response, Error> {
     let f2 = || check_status(f().send());
     // retry on a ConnectionAborted, which occurs if it's been a while since the last request
     match f2() {
         // Err(hyper::error::Error::Io(ref io))
         //     if io.kind() == std::io::ErrorKind::ConnectionAborted => f2(),
-        other => other
+        other => other,
     }
 }
 
 fn make_headers(user_name: String, api_key: String) -> hyper::header::Headers {
     let mut headers = hyper::header::Headers::new();
-    headers.set(
-       hyper::header::Authorization (
-           hyper::header::Basic {
-               username: user_name,
-               password: Some(api_key),
-           }
-       )
-    );
+    headers.set(hyper::header::Authorization(hyper::header::Basic {
+        username: user_name,
+        password: Some(api_key),
+    }));
     headers
 }
-
 
 type FieldPairs = Vec<(&'static str, String)>;
 
@@ -131,7 +104,7 @@ fn pc_to_pairs(participant: &ParticipantCreate) -> FieldPairs {
         (p!("seed"), participant.seed.to_string()),
         (p!("misc"), participant.misc.clone()),
     ];
-   
+
     if let Some(n) = participant.name.as_ref() {
         params.push((p!("name"), n.clone()));
     }
@@ -143,7 +116,7 @@ fn pc_to_pairs(participant: &ParticipantCreate) -> FieldPairs {
 
 fn at_to_pairs(attachment: &AttachmentCreate) -> FieldPairs {
     let mut params = FieldPairs::new();
-   
+
     if let Some(a) = attachment.asset.as_ref() {
         params.push((a!("asset"), String::from_utf8(a.clone()).unwrap()));
     }
@@ -156,32 +129,74 @@ fn at_to_pairs(attachment: &AttachmentCreate) -> FieldPairs {
     params
 }
 
-fn tc_to_pairs(tournament: &TournamentCreate) -> FieldPairs { 
+fn tc_to_pairs(tournament: &TournamentCreate) -> FieldPairs {
     let mut params = vec![
         (t!("name"), tournament.name.clone()),
-        (t!("tournament_type"), tournament.tournament_type.to_string()),
+        (
+            t!("tournament_type"),
+            tournament.tournament_type.to_string(),
+        ),
         (t!("url"), tournament.url.clone()),
         (t!("subdomain"), tournament.subdomain.clone()),
         (t!("description"), tournament.description.clone()),
         (t!("open_signup"), tournament.open_signup.to_string()),
-        (t!("hold_third_place_match"), tournament.hold_third_place_match.to_string()),
-        (t!("pts_for_match_win"), tournament.swiss_points.match_win.to_string()),
-        (t!("pts_for_match_tie"), tournament.swiss_points.match_tie.to_string()),
-        (t!("pts_for_game_win"), tournament.swiss_points.game_win.to_string()),
-        (t!("pts_for_game_tie"), tournament.swiss_points.game_tie.to_string()),
+        (
+            t!("hold_third_place_match"),
+            tournament.hold_third_place_match.to_string(),
+        ),
+        (
+            t!("pts_for_match_win"),
+            tournament.swiss_points.match_win.to_string(),
+        ),
+        (
+            t!("pts_for_match_tie"),
+            tournament.swiss_points.match_tie.to_string(),
+        ),
+        (
+            t!("pts_for_game_win"),
+            tournament.swiss_points.game_win.to_string(),
+        ),
+        (
+            t!("pts_for_game_tie"),
+            tournament.swiss_points.game_tie.to_string(),
+        ),
         (t!("swiss_rounds"), tournament.swiss_rounds.to_string()),
         (t!("ranked_by"), tournament.ranked_by.to_string()),
-        (t!("rr_pts_for_match_win"), tournament.round_robin_points.match_win.to_string()),
-        (t!("rr_pts_for_match_tie"), tournament.round_robin_points.match_tie.to_string()),
-        (t!("rr_pts_for_game_win"), tournament.round_robin_points.game_win.to_string()),
-        (t!("rr_pts_for_game_tie"), tournament.round_robin_points.game_tie.to_string()),
+        (
+            t!("rr_pts_for_match_win"),
+            tournament.round_robin_points.match_win.to_string(),
+        ),
+        (
+            t!("rr_pts_for_match_tie"),
+            tournament.round_robin_points.match_tie.to_string(),
+        ),
+        (
+            t!("rr_pts_for_game_win"),
+            tournament.round_robin_points.game_win.to_string(),
+        ),
+        (
+            t!("rr_pts_for_game_tie"),
+            tournament.round_robin_points.game_tie.to_string(),
+        ),
         (t!("show_rounds"), tournament.show_rounds.to_string()),
         (t!("private"), tournament.private.to_string()),
-        (t!("notify_users_when_matches_open"), tournament.notify_users_when_matches_open.to_string()),
-        (t!("notify_users_when_the_tournament_ends"), tournament.notify_users_when_the_tournament_ends.to_string()),
-        (t!("sequential_pairings"), tournament.sequential_pairings.to_string()),
+        (
+            t!("notify_users_when_matches_open"),
+            tournament.notify_users_when_matches_open.to_string(),
+        ),
+        (
+            t!("notify_users_when_the_tournament_ends"),
+            tournament.notify_users_when_the_tournament_ends.to_string(),
+        ),
+        (
+            t!("sequential_pairings"),
+            tournament.sequential_pairings.to_string(),
+        ),
         (t!("signup_cap"), tournament.signup_cap.to_string()),
-        (t!("check_in_duration"), tournament.check_in_duration.to_string()),
+        (
+            t!("check_in_duration"),
+            tournament.check_in_duration.to_string(),
+        ),
     ];
     if let Some(gfm) = tournament.grand_finals_modifier.as_ref() {
         params.push((t!("grand_finals_modifier"), gfm.clone()));
@@ -200,7 +215,7 @@ fn tc_to_pairs(tournament: &TournamentCreate) -> FieldPairs {
 
 fn mu_to_pairs(mu: &MatchUpdate) -> FieldPairs {
     let mut params = Vec::new();
-    
+
     if let Some(v) = mu.player1_votes {
         params.push((m!("player1_votes"), v.to_string()));
     }
@@ -236,7 +251,7 @@ impl Challonge {
         }
     }
 
-    /// Retrieve a set of tournaments created with your account. 
+    /// Retrieve a set of tournaments created with your account.
     /// # Example
     /// ```ignore
     /// extern crate challonge;
@@ -255,12 +270,14 @@ impl Challonge {
     ///        "subdomain"
     /// );
     /// ```
-    pub fn tournament_index(&self,
-                            state: &TournamentState,
-                            tournament_type: &TournamentType,
-                            created_after: &Date<Local>,
-                            created_before: &Date<Local>,
-                            subdomain: &str) -> Result<TournamentIndex, Error> {
+    pub fn tournament_index(
+        &self,
+        state: &TournamentState,
+        tournament_type: &TournamentType,
+        created_after: &Date<Local>,
+        created_before: &Date<Local>,
+        subdomain: &str,
+    ) -> Result<TournamentIndex, Error> {
         let mut url = hyper::Url::parse(&format!("{}/tournaments.json", API_BASE)).unwrap();
         url.query_pairs_mut()
             .append_pair("state", &state.to_string())
@@ -268,12 +285,15 @@ impl Challonge {
             .append_pair("created_after", &format_date!(created_after))
             .append_pair("created_before", &format_date!(created_before))
             .append_pair("subdomain", subdomain);
-        
-        let response = try!(retry(|| self.client.get(url.as_str()).headers(self.headers.clone())));
+
+        let response = try!(retry(|| self
+            .client
+            .get(url.as_str())
+            .headers(self.headers.clone())));
         TournamentIndex::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Retrieve a single tournament record created with your account. 
+    /// Retrieve a single tournament record created with your account.
     /// # Example
     /// ```ignore
     /// extern crate challonge;
@@ -284,18 +304,24 @@ impl Challonge {
     /// let i = TournamentIncludes::Matches;
     /// let t = c.get_tournament(&TournamentId::Id(2669881), &i);
     /// ```
-    pub fn get_tournament(&self,
-                          id: &TournamentId,
-                          includes: &TournamentIncludes) -> Result<Tournament, Error> {
-        let mut url = hyper::Url::parse(&format!("{}/tournaments/{}.json", API_BASE, id.to_string())).unwrap();
+    pub fn get_tournament(
+        &self,
+        id: &TournamentId,
+        includes: &TournamentIncludes,
+    ) -> Result<Tournament, Error> {
+        let mut url =
+            hyper::Url::parse(&format!("{}/tournaments/{}.json", API_BASE, id.to_string()))
+                .unwrap();
 
         Challonge::add_tournament_includes(&mut url, includes);
-        let response = try!(retry(|| self.client.get(url.as_str())
-                                        .headers(self.headers.clone())));
+        let response = try!(retry(|| self
+            .client
+            .get(url.as_str())
+            .headers(self.headers.clone())));
         Tournament::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Create a new tournament. 
+    /// Create a new tournament.
     /// # Example
     /// ```ignore
     /// extern crate challonge;
@@ -346,28 +372,37 @@ impl Challonge {
     pub fn create_tournament(&self, tournament: &TournamentCreate) -> Result<Tournament, Error> {
         let url = &format!("{}/tournaments.json", API_BASE);
         let body = pairs_to_string(tc_to_pairs(tournament));
-        let response = try!(retry(|| self.client.post(url)
-                                                .headers(self.headers.clone())
-                                                .body(&body)));
-        Tournament::decode(try!(serde_json::from_reader(response)))
-    }
-    
-    /// Update a tournament's attributes. 
-    pub fn update_tournament(&self,
-                             id: &TournamentId,
-                             tournament: &TournamentCreate) -> Result<Tournament, Error> {
-        let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
-        let body = pairs_to_string(tc_to_pairs(tournament));
-        let response = try!(retry(|| self.client.put(url)
-                                                .headers(self.headers.clone())
-                                                .body(&body)));
+        let response = try!(retry(|| self
+            .client
+            .post(url)
+            .headers(self.headers.clone())
+            .body(&body)));
         Tournament::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Deletes a tournament along with all its associated records. There is no undo, so use with care! 
+    /// Update a tournament's attributes.
+    pub fn update_tournament(
+        &self,
+        id: &TournamentId,
+        tournament: &TournamentCreate,
+    ) -> Result<Tournament, Error> {
+        let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
+        let body = pairs_to_string(tc_to_pairs(tournament));
+        let response = try!(retry(|| self
+            .client
+            .put(url)
+            .headers(self.headers.clone())
+            .body(&body)));
+        Tournament::decode(try!(serde_json::from_reader(response)))
+    }
+
+    /// Deletes a tournament along with all its associated records. There is no undo, so use with care!
     pub fn delete_tournament(&self, id: &TournamentId) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
-        let _ = try!(retry(|| self.client.delete(url).headers(self.headers.clone())));
+        let _ = try!(retry(|| self
+            .client
+            .delete(url)
+            .headers(self.headers.clone())));
         Ok(())
     }
 
@@ -378,177 +413,237 @@ impl Challonge {
     /// 3. Transitions the tournament state from 'checking_in' to 'checked_in'
     ///
     /// NOTE: Checked in participants on the waiting list will be promoted if slots become available.
-    pub fn tournament_process_checkins(&self,
-                                       id: &TournamentId,
-                                       includes: &TournamentIncludes) -> Result<(), Error> {
+    pub fn tournament_process_checkins(
+        &self,
+        id: &TournamentId,
+        includes: &TournamentIncludes,
+    ) -> Result<(), Error> {
         self.tournament_action("process_check_ins", id, includes)
     }
 
     /// When your tournament is in a 'checking_in' or 'checked_in' state, there's no way to edit the tournament's start time (start_at) or check-in duration (check_in_duration). You must first abort check-in, then you may edit those attributes.
-    /// 
+    ///
     /// 1. Makes all participants active and clears their checked_in_at times.
     /// 2. Transitions the tournament state from 'checking_in' or 'checked_in' to 'pending'
-    pub fn tournament_abort_checkins(&self,
-                                     id: &TournamentId,
-                                     includes: &TournamentIncludes) -> Result<(), Error> {
+    pub fn tournament_abort_checkins(
+        &self,
+        id: &TournamentId,
+        includes: &TournamentIncludes,
+    ) -> Result<(), Error> {
         self.tournament_action("abort_check_in", id, includes)
     }
 
-    /// Start a tournament, opening up first round matches for score reporting. The tournament must have at least 2 participants. 
-    pub fn tournament_start(&self,
-                            id: &TournamentId,
-                            includes: &TournamentIncludes) -> Result<(), Error> {
+    /// Start a tournament, opening up first round matches for score reporting. The tournament must have at least 2 participants.
+    pub fn tournament_start(
+        &self,
+        id: &TournamentId,
+        includes: &TournamentIncludes,
+    ) -> Result<(), Error> {
         self.tournament_action("start", id, includes)
     }
-    
-    /// Finalize a tournament that has had all match scores submitted, rendering its results permanent. 
-    pub fn tournament_finalize(&self,
-                               id: &TournamentId,
-                               includes: &TournamentIncludes) -> Result<(), Error> {
+
+    /// Finalize a tournament that has had all match scores submitted, rendering its results permanent.
+    pub fn tournament_finalize(
+        &self,
+        id: &TournamentId,
+        includes: &TournamentIncludes,
+    ) -> Result<(), Error> {
         self.tournament_action("finalize", id, includes)
     }
 
-    /// Reset a tournament, clearing all of its scores and attachments. You can then add/remove/edit participants before starting the tournament again. 
-    pub fn tournament_reset(&self,
-                            id: &TournamentId,
-                            includes: &TournamentIncludes) -> Result<(), Error> {
+    /// Reset a tournament, clearing all of its scores and attachments. You can then add/remove/edit participants before starting the tournament again.
+    pub fn tournament_reset(
+        &self,
+        id: &TournamentId,
+        includes: &TournamentIncludes,
+    ) -> Result<(), Error> {
         self.tournament_action("reset", id, includes)
     }
 
-    /// Retrieve a tournament's participant list. 
-    pub fn participant_index(&self,
-                             id: &TournamentId) -> Result<ParticipantIndex, Error> {
-        let url = &format!("{}/tournaments/{}/participants.json",
-                           API_BASE,
-                           id.to_string());
-        let response = try!(retry(|| self.client.get(url)
-                                                .headers(self.headers.clone())));
+    /// Retrieve a tournament's participant list.
+    pub fn participant_index(&self, id: &TournamentId) -> Result<ParticipantIndex, Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants.json",
+            API_BASE,
+            id.to_string()
+        );
+        let response = try!(retry(|| self.client.get(url).headers(self.headers.clone())));
         ParticipantIndex::decode(try!(serde_json::from_reader(response)))
     }
-    
-    /// Add a participant to a tournament (up until it is started). 
-    pub fn create_participant(&self,
-                              id: &TournamentId,
-                              participant: &ParticipantCreate) -> Result<Participant, Error> {
-        let url = &format!("{}/tournaments/{}/participants.json",
-                           API_BASE,
-                           id.to_string());
+
+    /// Add a participant to a tournament (up until it is started).
+    pub fn create_participant(
+        &self,
+        id: &TournamentId,
+        participant: &ParticipantCreate,
+    ) -> Result<Participant, Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants.json",
+            API_BASE,
+            id.to_string()
+        );
         let body = pairs_to_string(pc_to_pairs(participant));
-        let response = try!(retry(|| self.client.post(url)
-                                                .headers(self.headers.clone())
-                                                .body(&body)));
+        let response = try!(retry(|| self
+            .client
+            .post(url)
+            .headers(self.headers.clone())
+            .body(&body)));
         Participant::decode(try!(serde_json::from_reader(response)))
     }
 
     /// Bulk add participants to a tournament (up until it is started).
-    /// If an invalid participant is detected, bulk participant creation will halt and any previously added participants (from this API request) will be rolled back. 
-    pub fn create_participant_bulk(&self,
-                                   id: &TournamentId,
-                                   participants: Vec<ParticipantCreate>) -> Result<(), Error> {
-        let url = &format!("{}/tournaments/{}/participants/bulk_add.json",
-                           API_BASE,
-                           id.to_string());
+    /// If an invalid participant is detected, bulk participant creation will halt and any previously added participants (from this API request) will be rolled back.
+    pub fn create_participant_bulk(
+        &self,
+        id: &TournamentId,
+        participants: Vec<ParticipantCreate>,
+    ) -> Result<(), Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants/bulk_add.json",
+            API_BASE,
+            id.to_string()
+        );
         let body = pairs_to_string(pcs_to_pairs(participants));
-        let response = try!(retry(|| self.client.post(url)
-                                                .headers(self.headers.clone())
-                                                .body(&body)));
+        let response = try!(retry(|| self
+            .client
+            .post(url)
+            .headers(self.headers.clone())
+            .body(&body)));
         let _: () = try!(serde_json::from_reader(response));
         Ok(())
     }
-    
+
     /// Retrieve a single participant record for a tournament.
-    pub fn get_participant(&self,
-                           id: &TournamentId,
-                           participant_id: &ParticipantId,
-                           include_matches: bool) -> Result<Participant, Error> {
-        let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/participants/{}.json",
-                                                 API_BASE,
-                                                 id.to_string(),
-                                                 participant_id.0)).unwrap();
+    pub fn get_participant(
+        &self,
+        id: &TournamentId,
+        participant_id: &ParticipantId,
+        include_matches: bool,
+    ) -> Result<Participant, Error> {
+        let mut url = hyper::Url::parse(&format!(
+            "{}/tournaments/{}/participants/{}.json",
+            API_BASE,
+            id.to_string(),
+            participant_id.0
+        ))
+        .unwrap();
         url.query_pairs_mut()
             .append_pair("include_matches", &(include_matches as i64).to_string());
-        
-        let response = try!(retry(|| self.client.get(url.as_str())
-                                                .headers(self.headers.clone())));
+
+        let response = try!(retry(|| self
+            .client
+            .get(url.as_str())
+            .headers(self.headers.clone())));
         Participant::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Update the attributes of a tournament participant. 
-    pub fn update_participant(&self,
-                              id: &TournamentId,
-                              participant_id: &ParticipantId,
-                              participant: &ParticipantCreate) -> Result<(), Error> {
-        let url = &format!("{}/tournaments/{}/participants/{}.json",
-                           API_BASE,
-                           id.to_string(),
-                           participant_id.0);
+    /// Update the attributes of a tournament participant.
+    pub fn update_participant(
+        &self,
+        id: &TournamentId,
+        participant_id: &ParticipantId,
+        participant: &ParticipantCreate,
+    ) -> Result<(), Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants/{}.json",
+            API_BASE,
+            id.to_string(),
+            participant_id.0
+        );
         let body = pairs_to_string(pc_to_pairs(participant));
-        let _ = try!(retry(|| self.client.put(url)
-                                         .headers(self.headers.clone())
-                                         .body(&body)));
+        let _ = try!(retry(|| self
+            .client
+            .put(url)
+            .headers(self.headers.clone())
+            .body(&body)));
         Ok(())
     }
 
-    /// Checks a participant in, setting checked_in_at to the current time. 
-    pub fn check_in_participant(&self,
-                                id: &TournamentId,
-                                participant_id: &ParticipantId) -> Result<(), Error> {
-        let url = &format!("{}/tournaments/{}/participants/{}/check_in.json",
-                           API_BASE,
-                           id.to_string(),
-                           participant_id.0);
-        let _ = try!(retry(|| self.client.post(url)
-                                         .headers(self.headers.clone())));
+    /// Checks a participant in, setting checked_in_at to the current time.
+    pub fn check_in_participant(
+        &self,
+        id: &TournamentId,
+        participant_id: &ParticipantId,
+    ) -> Result<(), Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants/{}/check_in.json",
+            API_BASE,
+            id.to_string(),
+            participant_id.0
+        );
+        let _ = try!(retry(|| self
+            .client
+            .post(url)
+            .headers(self.headers.clone())));
         Ok(())
     }
-    
 
-    /// Marks a participant as having not checked in, setting checked_in_at to nil. 
-    pub fn undo_check_in_participant(&self,
-                                     id: &TournamentId,
-                                     participant_id: &ParticipantId) -> Result<(), Error> {
-        let url = &format!("{}/tournaments/{}/participants/{}/undo_check_in.json",
-                           API_BASE,
-                           id.to_string(),
-                           participant_id.0);
-        let _ = try!(retry(|| self.client.post(url)
-                                         .headers(self.headers.clone())));
+    /// Marks a participant as having not checked in, setting checked_in_at to nil.
+    pub fn undo_check_in_participant(
+        &self,
+        id: &TournamentId,
+        participant_id: &ParticipantId,
+    ) -> Result<(), Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants/{}/undo_check_in.json",
+            API_BASE,
+            id.to_string(),
+            participant_id.0
+        );
+        let _ = try!(retry(|| self
+            .client
+            .post(url)
+            .headers(self.headers.clone())));
         Ok(())
     }
 
     /// If the tournament has not started, delete a participant, automatically filling in the abandoned seed number.
-    /// If tournament is underway, mark a participant inactive, automatically forfeiting his/her remaining matches. 
-    pub fn delete_participant(&self,
-                              id: &TournamentId,
-                              participant_id: &ParticipantId) -> Result<(), Error> {
-        let url = &format!("{}/tournaments/{}/participants/{}.json",
-                           API_BASE,
-                           id.to_string(),
-                           participant_id.0);
-        let _ = try!(retry(|| self.client.delete(url)
-                                         .headers(self.headers.clone())));
+    /// If tournament is underway, mark a participant inactive, automatically forfeiting his/her remaining matches.
+    pub fn delete_participant(
+        &self,
+        id: &TournamentId,
+        participant_id: &ParticipantId,
+    ) -> Result<(), Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants/{}.json",
+            API_BASE,
+            id.to_string(),
+            participant_id.0
+        );
+        let _ = try!(retry(|| self
+            .client
+            .delete(url)
+            .headers(self.headers.clone())));
         Ok(())
     }
 
-    /// Randomize seeds among participants. Only applicable before a tournament has started. 
-    pub fn randomize_participants(&self,
-                                  id: &TournamentId) -> Result<(), Error> {
-        let url = &format!("{}/tournaments/{}/participants/randomize.json",
-                           API_BASE,
-                           id.to_string());
-        let _ = try!(retry(|| self.client.post(url)
-                                         .headers(self.headers.clone())));
+    /// Randomize seeds among participants. Only applicable before a tournament has started.
+    pub fn randomize_participants(&self, id: &TournamentId) -> Result<(), Error> {
+        let url = &format!(
+            "{}/tournaments/{}/participants/randomize.json",
+            API_BASE,
+            id.to_string()
+        );
+        let _ = try!(retry(|| self
+            .client
+            .post(url)
+            .headers(self.headers.clone())));
         Ok(())
     }
 
-    /// Retrieve a tournament's match list. 
-    pub fn match_index(&self,
-                       id: &TournamentId,
-                       state: Option<MatchState>,
-                       participant_id: Option<ParticipantId>) -> Result<MatchIndex, Error> {
-        let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/matches.json",
-                                                 API_BASE,
-                                                 id.to_string())).unwrap();
+    /// Retrieve a tournament's match list.
+    pub fn match_index(
+        &self,
+        id: &TournamentId,
+        state: Option<MatchState>,
+        participant_id: Option<ParticipantId>,
+    ) -> Result<MatchIndex, Error> {
+        let mut url = hyper::Url::parse(&format!(
+            "{}/tournaments/{}/matches.json",
+            API_BASE,
+            id.to_string()
+        ))
+        .unwrap();
         {
             let mut pairs = url.query_pairs_mut();
             if let Some(s) = state {
@@ -558,130 +653,179 @@ impl Challonge {
                 pairs.append_pair("participant_id", &pid.0.to_string());
             }
         }
-        let response = try!(retry(|| self.client.get(url.as_str())
-                                                .headers(self.headers.clone())));
+        let response = try!(retry(|| self
+            .client
+            .get(url.as_str())
+            .headers(self.headers.clone())));
         MatchIndex::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Retrieve a single match record for a tournament. 
-    pub fn get_match(&self,
-                     id: &TournamentId,
-                     match_id: &MatchId,
-                     include_attachments: bool) -> Result<Match, Error> {
-        let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/matches/{}.json",
-                                                 API_BASE,
-                                                 id.to_string(),
-                                                 match_id.0)).unwrap();
-        url.query_pairs_mut()
-            .append_pair("include_attachments", &(include_attachments as i64).to_string());
-        let response = try!(retry(|| self.client.get(url.as_str())
-                                                .headers(self.headers.clone())));
-        Match::decode(try!(serde_json::from_reader(response)))
-    }
-    
-    /// Update/submit the score(s) for a match.
-    pub fn update_match(&self,
-                        id: &TournamentId,
-                        match_id: &MatchId,
-                        match_update: &MatchUpdate) -> Result<Match, Error> {
-        let url = &format!("{}/tournaments/{}/matches/{}.json",
-                           API_BASE,
-                           id.to_string(),
-                           match_id.0);
-        let body = pairs_to_string(mu_to_pairs(match_update));
-        let response = try!(retry(|| self.client.put(url)
-                                                .headers(self.headers.clone())
-                                                .body(&body)));
+    /// Retrieve a single match record for a tournament.
+    pub fn get_match(
+        &self,
+        id: &TournamentId,
+        match_id: &MatchId,
+        include_attachments: bool,
+    ) -> Result<Match, Error> {
+        let mut url = hyper::Url::parse(&format!(
+            "{}/tournaments/{}/matches/{}.json",
+            API_BASE,
+            id.to_string(),
+            match_id.0
+        ))
+        .unwrap();
+        url.query_pairs_mut().append_pair(
+            "include_attachments",
+            &(include_attachments as i64).to_string(),
+        );
+        let response = try!(retry(|| self
+            .client
+            .get(url.as_str())
+            .headers(self.headers.clone())));
         Match::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Retrieve a match's attachments. 
-    pub fn attachments_index(&self,
-                             id: &TournamentId,
-                             match_id: &MatchId) -> Result<AttachmentIndex, Error> {
-        let url = &format!("{}/tournaments/{}/matches/{}/attachments.json",
-                           API_BASE,
-                           id.to_string(),
-                           match_id.0);
-        let response = try!(retry(|| self.client.get(url)
-                                                .headers(self.headers.clone())));
+    /// Update/submit the score(s) for a match.
+    pub fn update_match(
+        &self,
+        id: &TournamentId,
+        match_id: &MatchId,
+        match_update: &MatchUpdate,
+    ) -> Result<Match, Error> {
+        let url = &format!(
+            "{}/tournaments/{}/matches/{}.json",
+            API_BASE,
+            id.to_string(),
+            match_id.0
+        );
+        let body = pairs_to_string(mu_to_pairs(match_update));
+        let response = try!(retry(|| self
+            .client
+            .put(url)
+            .headers(self.headers.clone())
+            .body(&body)));
+        Match::decode(try!(serde_json::from_reader(response)))
+    }
+
+    /// Retrieve a match's attachments.
+    pub fn attachments_index(
+        &self,
+        id: &TournamentId,
+        match_id: &MatchId,
+    ) -> Result<AttachmentIndex, Error> {
+        let url = &format!(
+            "{}/tournaments/{}/matches/{}/attachments.json",
+            API_BASE,
+            id.to_string(),
+            match_id.0
+        );
+        let response = try!(retry(|| self.client.get(url).headers(self.headers.clone())));
         AttachmentIndex::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Retrieve a single match attachment record. 
-    pub fn get_attachment(&self,
-                          id: &TournamentId,
-                          match_id: &MatchId,
-                          attachment_id: &AttachmentId) -> Result<Attachment, Error> {
-        let url = &format!("{}/tournaments/{}/matches/{}/attachments/{}.json",
-                           API_BASE,
-                           id.to_string(),
-                           match_id.0,
-                           attachment_id.0);
-        let response = try!(retry(|| self.client.get(url)
-                                                .headers(self.headers.clone())));
+    /// Retrieve a single match attachment record.
+    pub fn get_attachment(
+        &self,
+        id: &TournamentId,
+        match_id: &MatchId,
+        attachment_id: &AttachmentId,
+    ) -> Result<Attachment, Error> {
+        let url = &format!(
+            "{}/tournaments/{}/matches/{}/attachments/{}.json",
+            API_BASE,
+            id.to_string(),
+            match_id.0,
+            attachment_id.0
+        );
+        let response = try!(retry(|| self.client.get(url).headers(self.headers.clone())));
         Attachment::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Add a file, link, or text attachment to a match. NOTE: The associated tournament's "accept_attachments" attribute must be true for this action to succeed. 
-    pub fn create_attachment(&self,
-                             id: &TournamentId,
-                             match_id: &MatchId,
-                             attachment: &AttachmentCreate) -> Result<Attachment, Error> {
-        let url = &format!("{}/tournaments/{}/matches/{}/attachments.json",
-                           API_BASE,
-                           id.to_string(),
-                           match_id.0);
+    /// Add a file, link, or text attachment to a match. NOTE: The associated tournament's "accept_attachments" attribute must be true for this action to succeed.
+    pub fn create_attachment(
+        &self,
+        id: &TournamentId,
+        match_id: &MatchId,
+        attachment: &AttachmentCreate,
+    ) -> Result<Attachment, Error> {
+        let url = &format!(
+            "{}/tournaments/{}/matches/{}/attachments.json",
+            API_BASE,
+            id.to_string(),
+            match_id.0
+        );
         let body = pairs_to_string(at_to_pairs(attachment));
-        let response = try!(retry(|| self.client.post(url)
-                                                .headers(self.headers.clone())
-                                                .body(&body)));
+        let response = try!(retry(|| self
+            .client
+            .post(url)
+            .headers(self.headers.clone())
+            .body(&body)));
         Attachment::decode(try!(serde_json::from_reader(response)))
     }
 
     /// Update the attributes of a match attachment.
-    pub fn update_attachment(&self,
-                             id: &TournamentId,
-                             match_id: &MatchId,
-                             attachment_id: &AttachmentId,
-                             attachment: &AttachmentCreate) -> Result<Attachment, Error> {
-        let url = &format!("{}/tournaments/{}/matches/{}/attachments/{}.json",
-                           API_BASE,
-                           id.to_string(),
-                           match_id.0,
-                           attachment_id.0);
+    pub fn update_attachment(
+        &self,
+        id: &TournamentId,
+        match_id: &MatchId,
+        attachment_id: &AttachmentId,
+        attachment: &AttachmentCreate,
+    ) -> Result<Attachment, Error> {
+        let url = &format!(
+            "{}/tournaments/{}/matches/{}/attachments/{}.json",
+            API_BASE,
+            id.to_string(),
+            match_id.0,
+            attachment_id.0
+        );
         let body = pairs_to_string(at_to_pairs(attachment));
-        let response = try!(retry(|| self.client.put(url)
-                                                .headers(self.headers.clone())
-                                                .body(&body)));
+        let response = try!(retry(|| self
+            .client
+            .put(url)
+            .headers(self.headers.clone())
+            .body(&body)));
         Attachment::decode(try!(serde_json::from_reader(response)))
     }
 
-    /// Delete a match attachment. 
-    pub fn delete_attachment(&self,
-                             id: &TournamentId,
-                             match_id: &MatchId,
-                             attachment_id: &AttachmentId) -> Result<(), Error> {
-        let url = &format!("{}/tournaments/{}/matches/{}/attachments/{}.json",
-                           API_BASE,
-                           id.to_string(),
-                           match_id.0,
-                           attachment_id.0);
-        let _ = try!(retry(|| self.client.delete(url)
-                                         .headers(self.headers.clone())));
+    /// Delete a match attachment.
+    pub fn delete_attachment(
+        &self,
+        id: &TournamentId,
+        match_id: &MatchId,
+        attachment_id: &AttachmentId,
+    ) -> Result<(), Error> {
+        let url = &format!(
+            "{}/tournaments/{}/matches/{}/attachments/{}.json",
+            API_BASE,
+            id.to_string(),
+            match_id.0,
+            attachment_id.0
+        );
+        let _ = try!(retry(|| self
+            .client
+            .delete(url)
+            .headers(self.headers.clone())));
         Ok(())
     }
 
-    fn tournament_action(&self,
-                         endpoint: &str,
-                         id: &TournamentId,
-                         includes: &TournamentIncludes) -> Result<(), Error> {
-        let mut url = hyper::Url::parse(&format!("{}/tournaments/{}/{}.json",
-                                                 API_BASE,
-                                                 id.to_string(),
-                                                 endpoint)).unwrap();
+    fn tournament_action(
+        &self,
+        endpoint: &str,
+        id: &TournamentId,
+        includes: &TournamentIncludes,
+    ) -> Result<(), Error> {
+        let mut url = hyper::Url::parse(&format!(
+            "{}/tournaments/{}/{}.json",
+            API_BASE,
+            id.to_string(),
+            endpoint
+        ))
+        .unwrap();
         Challonge::add_tournament_includes(&mut url, includes);
-        let _ = try!(retry(|| self.client.post(url.as_str()).headers(self.headers.clone())));
+        let _ = try!(retry(|| self
+            .client
+            .post(url.as_str())
+            .headers(self.headers.clone())));
         Ok(())
     }
 
@@ -693,19 +837,18 @@ impl Challonge {
                 pairs
                     .append_pair("include_participants", "1")
                     .append_pair("include_matches", "1");
-            },
+            }
             TournamentIncludes::Matches => {
                 pairs
                     .append_pair("include_participants", "0")
                     .append_pair("include_matches", "1");
-            },
+            }
             TournamentIncludes::Participants => {
                 pairs
                     .append_pair("include_participants", "1")
                     .append_pair("include_matches", "0");
-            },
+            }
         }
-
     }
 
     // fn prepare<'a>(&self, url: &str) -> hyper::client::RequestBuilder<'a> {
@@ -716,6 +859,5 @@ impl Challonge {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-    }
+    fn it_works() {}
 }

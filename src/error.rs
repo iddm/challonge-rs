@@ -14,10 +14,8 @@ pub enum Error {
     /// A generic non-success response from the REST API
     Status(hyper::status::StatusCode, Option<serde_json::Value>),
 
-
     /// A `serde_json` crate error
     Json(JsonError),
-
 
     /// A json decoding error, with a description and the offending value
     Decode(&'static str, serde_json::Value),

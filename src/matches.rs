@@ -2,17 +2,16 @@
 
 extern crate serde_json;
 
-use serde_json::Value;
 use chrono::*;
+use serde_json::Value;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::str::FromStr;
 
-use util::{decode_array, into_map, remove};
 use error::Error;
 use participants::ParticipantId;
 use tournament::TournamentId;
-
+use util::{decode_array, into_map, remove};
 
 /// Represents a pair of scores - for player 1 and player 2 respectively.
 #[derive(Debug, Clone, PartialEq)]
@@ -21,9 +20,19 @@ impl MatchScore {
     /// Decodes `MatchScore` from JSON.
     pub fn decode(string: &str) -> Result<MatchScore, Error> {
         let mut parts = string.trim().split('-');
-        Ok(MatchScore (
-            parts.next().unwrap_or("").trim().parse::<u64>().unwrap_or(0),
-            parts.next().unwrap_or("").trim().parse::<u64>().unwrap_or(0),
+        Ok(MatchScore(
+            parts
+                .next()
+                .unwrap_or("")
+                .trim()
+                .parse::<u64>()
+                .unwrap_or(0),
+            parts
+                .next()
+                .unwrap_or("")
+                .trim()
+                .parse::<u64>()
+                .unwrap_or(0),
         ))
     }
 }
@@ -63,14 +72,14 @@ impl fmt::Display for MatchScores {
     }
 }
 
-/// Represents an ID of a match 
+/// Represents an ID of a match
 #[derive(Debug, Clone, PartialEq)]
 pub struct MatchId(pub u64);
 
-/// Current match state. 
+/// Current match state.
 #[derive(Debug, Clone, PartialEq)]
 pub enum MatchState {
-    /// Any state of a match. 
+    /// Any state of a match.
     All,
 
     /// Match is in a pending state.
@@ -87,16 +96,16 @@ impl fmt::Display for MatchState {
         match *self {
             MatchState::All => {
                 try!(fmt.write_str("all"));
-            },
+            }
             MatchState::Pending => {
                 try!(fmt.write_str("pending"));
-            },
+            }
             MatchState::Open => {
                 try!(fmt.write_str("open"));
-            },
+            }
             MatchState::Complete => {
                 try!(fmt.write_str("complete"));
-            },
+            }
         }
         Ok(())
     }
@@ -114,7 +123,7 @@ impl FromStr for MatchState {
     }
 }
 
-/// A list of matches of the tournament. 
+/// A list of matches of the tournament.
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Index(pub Vec<Match>);
@@ -134,7 +143,7 @@ pub struct MatchUpdate {
     /// The participant ID of the winner or "tie" if applicable (Round Robin and Swiss).
     /// NOTE: If you change the outcome of a completed match, all matches in the bracket that branch from the updated match will be reset.
     pub winner_id: Option<ParticipantId>,
-    
+
     /// Overwrites the number of votes for player 1
     pub player1_votes: Option<u64>,
 
@@ -168,17 +177,29 @@ pub struct Player {
     /// ???
     pub prereq_match_id: Option<MatchId>,
     /// Number of votes to the user.
-    pub votes: u64
+    pub votes: u64,
 }
 impl Player {
     /// Decodes `Player` from JSON
     pub fn decode(mut map: &mut BTreeMap<String, Value>, prefix: &str) -> Result<Player, Error> {
         Ok(Player {
-            id: ParticipantId(try!(remove(&mut map, &format!("{}id", prefix))).as_u64().unwrap_or(0)),
-            is_prereq_match_loser: try!(remove(&mut map, &format!("{}is_prereq_match_loser", prefix))).as_boolean().unwrap_or(false),
+            id: ParticipantId(
+                try!(remove(&mut map, &format!("{}id", prefix)))
+                    .as_u64()
+                    .unwrap_or(0),
+            ),
+            is_prereq_match_loser: try!(remove(
+                &mut map,
+                &format!("{}is_prereq_match_loser", prefix)
+            ))
+            .as_boolean()
+            .unwrap_or(false),
             prereq_match_id: try!(remove(&mut map, &format!("{}prereq_match_id", prefix)))
-                .as_u64().map_or(None, |i| Some(MatchId(i))),
-            votes: try!(remove(&mut map, &format!("{}votes", prefix))).as_u64().unwrap_or(0),
+                .as_u64()
+                .map_or(None, |i| Some(MatchId(i))),
+            votes: try!(remove(&mut map, &format!("{}votes", prefix)))
+                .as_u64()
+                .unwrap_or(0),
         })
     }
 }
@@ -190,23 +211,22 @@ pub struct Match {
     /// Holds a time when match was created.
     pub created_at: DateTime<FixedOffset>,
     // group_id: ,
-    
-    /// Does the match has an attachment? 
+    /// Does the match has an attachment?
     pub has_attachment: bool,
 
-    /// Unique Match identifier 
+    /// Unique Match identifier
     pub id: MatchId,
 
-    /// ??? 
+    /// ???
     pub identifier: String,
-    // location: 
-    /// An id of user which lost the match 
+    // location:
+    /// An id of user which lost the match
     pub loser_id: Option<ParticipantId>,
 
-    /// Information about first player 
+    /// Information about first player
     pub player1: Player,
 
-    /// Information about second player 
+    /// Information about second player
     pub player2: Player,
 
     /// Number of current round of the match.
@@ -215,22 +235,22 @@ pub struct Match {
     /// Holds a time when match was started.
     pub started_at: Option<DateTime<FixedOffset>>,
 
-    /// State of the match. 
+    /// State of the match.
     pub state: MatchState,
 
-    /// Id of a tournament to which this match belongs. 
+    /// Id of a tournament to which this match belongs.
     pub tournament_id: TournamentId,
-    // // underway_at: 
-    /// A time when match was updated last time. 
+    // // underway_at:
+    /// A time when match was updated last time.
     pub updated_at: DateTime<FixedOffset>,
 
-    /// An id of user which won the match 
+    /// An id of user which won the match
     pub winner_id: Option<ParticipantId>,
 
-    /// ??? 
+    /// ???
     pub prerequisite_match_ids_csv: String,
 
-    /// Match scores (pairs of score for first and second player) 
+    /// Match scores (pairs of score for first and second player)
     pub scores_csv: MatchScores,
 }
 impl Match {
@@ -248,25 +268,51 @@ impl Match {
         }
 
         Ok(Match {
-            created_at: DateTime::parse_from_rfc3339(try!(remove(&mut tv, "created_at")).as_string().unwrap_or("")).unwrap(),
-            has_attachment: try!(remove(&mut tv, "has_attachment")).as_boolean().unwrap_or(false),
+            created_at: DateTime::parse_from_rfc3339(
+                try!(remove(&mut tv, "created_at"))
+                    .as_string()
+                    .unwrap_or(""),
+            )
+            .unwrap(),
+            has_attachment: try!(remove(&mut tv, "has_attachment"))
+                .as_boolean()
+                .unwrap_or(false),
             id: MatchId(try!(remove(&mut tv, "id")).as_u64().unwrap()),
-            identifier: try!(remove(&mut tv, "identifier")).as_string().unwrap_or("").to_owned(),
-            loser_id: try!(remove(&mut tv, "loser_id")).as_u64()
+            identifier: try!(remove(&mut tv, "identifier"))
+                .as_string()
+                .unwrap_or("")
+                .to_owned(),
+            loser_id: try!(remove(&mut tv, "loser_id"))
+                .as_u64()
                 .map_or(None, |i| Some(ParticipantId(i))),
             player1: Player::decode(&mut tv, "player1_").unwrap(),
             player2: Player::decode(&mut tv, "player2_").unwrap(),
             round: try!(remove(&mut tv, "round")).as_u64().unwrap(),
             started_at: started_at,
-            state: MatchState::from_str(try!(remove(&mut tv, "state")).as_string()
-                                        .unwrap_or(""))
-                                        .unwrap_or(MatchState::All),
-            tournament_id: TournamentId::Id(try!(remove(&mut tv, "tournament_id")).as_u64().unwrap()),
-            updated_at: DateTime::parse_from_rfc3339(try!(remove(&mut tv, "updated_at")).as_string().unwrap_or("")).unwrap(),
-            winner_id: try!(remove(&mut tv, "winner_id")).as_u64()
+            state: MatchState::from_str(try!(remove(&mut tv, "state")).as_string().unwrap_or(""))
+                .unwrap_or(MatchState::All),
+            tournament_id: TournamentId::Id(
+                try!(remove(&mut tv, "tournament_id")).as_u64().unwrap(),
+            ),
+            updated_at: DateTime::parse_from_rfc3339(
+                try!(remove(&mut tv, "updated_at"))
+                    .as_string()
+                    .unwrap_or(""),
+            )
+            .unwrap(),
+            winner_id: try!(remove(&mut tv, "winner_id"))
+                .as_u64()
                 .map_or(None, |i| Some(ParticipantId(i))),
-            prerequisite_match_ids_csv: try!(remove(&mut tv, "prerequisite_match_ids_csv")).as_string().unwrap_or("").to_owned(),
-            scores_csv: MatchScores::decode(try!(remove(&mut tv, "scores_csv")).as_string().unwrap_or("").to_owned()),
+            prerequisite_match_ids_csv: try!(remove(&mut tv, "prerequisite_match_ids_csv"))
+                .as_string()
+                .unwrap_or("")
+                .to_owned(),
+            scores_csv: MatchScores::decode(
+                try!(remove(&mut tv, "scores_csv"))
+                    .as_string()
+                    .unwrap_or("")
+                    .to_owned(),
+            ),
         })
     }
 }
@@ -274,13 +320,8 @@ impl Match {
 #[cfg(test)]
 mod tests {
     extern crate serde_json;
-    use matches::{
-        Match,
-        MatchState,
-        MatchScore,
-    };
+    use matches::{Match, MatchScore, MatchState};
     use tournament::TournamentId;
-
 
     #[test]
     fn test_score_parse() {
@@ -365,10 +406,7 @@ mod tests {
             assert_eq!(m.winner_id, None);
             assert!(m.prerequisite_match_ids_csv.is_empty());
             {
-                let correct_scores = vec![
-                    MatchScore(3, 1),
-                    MatchScore(3, 2),
-                ];
+                let correct_scores = vec![MatchScore(3, 1), MatchScore(3, 2)];
                 assert_eq!(m.scores_csv.0.len(), 2);
                 let mut iter = m.scores_csv.0.iter().zip(correct_scores.iter());
                 while let Some(pair) = iter.next() {

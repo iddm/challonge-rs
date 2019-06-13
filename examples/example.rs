@@ -1,32 +1,27 @@
 extern crate challonge;
 extern crate chrono;
 
-use challonge::Challonge;
 use challonge::tournament::{
-    TournamentId,
-    TournamentCreate,
-    TournamentType,
-    TournamentState,
-    TournamentIncludes,
+    TournamentCreate, TournamentId, TournamentIncludes, TournamentState, TournamentType,
 };
+use challonge::Challonge;
 use challonge::ParticipantCreate;
 use chrono::*;
-
 
 fn main() {
     let c = Challonge::new("myusername", "myapi_key");
     let i = c.tournament_index(
-            &TournamentState::All,
-            &TournamentType::DoubleElimination,
-            &Local::today(),
-            &Local::today(),
-            "subdomain"
-            );
+        &TournamentState::All,
+        &TournamentType::DoubleElimination,
+        &Local::today(),
+        &Local::today(),
+        "subdomain",
+    );
     println!("Index: {:?}", i);
 
     let t = c.get_tournament(&TournamentId::Id(2669881), &TournamentIncludes::All);
     println!("Tournament: {:?}", t.unwrap());
-    
+
     // let tc = TournamentCreate {
     //     name: "Tester".to_owned(),
     //     tournament_type: TournamentType::SingleElimination,
@@ -57,25 +52,57 @@ fn main() {
     //     grand_finals_modifier: None,
     // };
     let mut tc = TournamentCreate::new();
-        tc.name("Test tournament")
-          .tournament_type(TournamentType::SingleElimination)
-          .url("TestUrl")
-          .subdomain("subdomain")
-          .description("TEST TOURNAMENT created by challonge-rs");
+    tc.name("Test tournament")
+        .tournament_type(TournamentType::SingleElimination)
+        .url("TestUrl")
+        .subdomain("subdomain")
+        .description("TEST TOURNAMENT created by challonge-rs");
     let t = c.create_tournament(&tc);
     println!("Created tournament: {:?}", t);
-
 
     let tt = c.update_tournament(&TournamentId::Id(2674470), &tc);
     println!("Updated tournament: {:?}", tt);
 
-    println!("Delete result: {:?}", c.delete_tournament(&TournamentId::Id(2674588)));
+    println!(
+        "Delete result: {:?}",
+        c.delete_tournament(&TournamentId::Id(2674588))
+    );
 
-    println!("Check-in process result: {:?}", c.tournament_process_checkins(&TournamentId::Url("subdomain".to_owned(), "test1".to_owned()), &TournamentIncludes::All));
-    println!("Check-in abort result: {:?}", c.tournament_abort_checkins(&TournamentId::Url("subdomain".to_owned(), "test1".to_owned()), &TournamentIncludes::All));
-    println!("Start result: {:?}", c.tournament_start(&TournamentId::Url("subdomain".to_owned(), "test1".to_owned()), &TournamentIncludes::All));
-    println!("Finalize result: {:?}", c.tournament_finalize(&TournamentId::Url("subdomain".to_owned(), "test1".to_owned()), &TournamentIncludes::All));
-    println!("Reset result: {:?}", c.tournament_reset(&TournamentId::Url("subdomain".to_owned(), "test1".to_owned()), &TournamentIncludes::All));
+    println!(
+        "Check-in process result: {:?}",
+        c.tournament_process_checkins(
+            &TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
+            &TournamentIncludes::All
+        )
+    );
+    println!(
+        "Check-in abort result: {:?}",
+        c.tournament_abort_checkins(
+            &TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
+            &TournamentIncludes::All
+        )
+    );
+    println!(
+        "Start result: {:?}",
+        c.tournament_start(
+            &TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
+            &TournamentIncludes::All
+        )
+    );
+    println!(
+        "Finalize result: {:?}",
+        c.tournament_finalize(
+            &TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
+            &TournamentIncludes::All
+        )
+    );
+    println!(
+        "Reset result: {:?}",
+        c.tournament_reset(
+            &TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
+            &TournamentIncludes::All
+        )
+    );
 
     let pc = ParticipantCreate {
         // name: "username".to_owned(),
@@ -85,8 +112,20 @@ fn main() {
         seed: 1,
         misc: "PIZDEC ON KRASAVCHIK".to_owned(),
     };
-    println!("Participant result: {:?}", c.create_participant(&TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
-    &pc));
+    println!(
+        "Participant result: {:?}",
+        c.create_participant(
+            &TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
+            &pc
+        )
+    );
 
-    println!("Matches: {:?}", c.match_index(&TournamentId::Url("subdomain".to_owned(), "test1".to_owned()), None, None));
+    println!(
+        "Matches: {:?}",
+        c.match_index(
+            &TournamentId::Url("subdomain".to_owned(), "test1".to_owned()),
+            None,
+            None
+        )
+    );
 }

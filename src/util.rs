@@ -4,12 +4,10 @@ use std::collections::BTreeMap;
 
 pub fn decode_array<T, F: Fn(Value) -> Result<T, Error>>(
     value: Value,
-    f: F
+    f: F,
 ) -> Result<Vec<T>, Error> {
     match value {
-        Value::Array(arr) => arr.into_iter()
-            .map(f)
-            .collect(),
+        Value::Array(arr) => arr.into_iter().map(f).collect(),
         _ => Err(Error::Decode("Error decoding object", value)),
     }
 }
@@ -22,5 +20,8 @@ pub fn into_map(value: Value) -> Result<BTreeMap<String, Value>, Error> {
 }
 
 pub fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> {
-    map.remove(key).ok_or(Error::Decode("Unexpected absent key", Value::String(key.into())))
+    map.remove(key).ok_or(Error::Decode(
+        "Unexpected absent key",
+        Value::String(key.into()),
+    ))
 }
