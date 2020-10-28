@@ -78,7 +78,11 @@ impl fmt::Display for TournamentId {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             TournamentId::Url(ref subdomain, ref tournament_url) => {
-                try!(fmt.write_str(&format!("{}-{}", subdomain, tournament_url)));
+                if subdomain.is_empty() {
+                    try!(fmt.write_str(tournament_url));
+                } else {
+                    try!(fmt.write_str(&format!("{}-{}", subdomain, tournament_url)));
+                }
             }
             TournamentId::Id(ref id) => {
                 try!(fmt.write_str(&id.to_string()));
