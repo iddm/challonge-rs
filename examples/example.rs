@@ -1,6 +1,3 @@
-extern crate challonge;
-extern crate chrono;
-
 use challonge::tournament::{
     TournamentCreate, TournamentId, TournamentIncludes, TournamentState, TournamentType,
 };

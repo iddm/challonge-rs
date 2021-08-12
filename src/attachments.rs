@@ -1,7 +1,5 @@
 //! Challonge Attachment type.
 
-extern crate serde_json;
-
 use crate::error::Error;
 use crate::matches::MatchId;
 use crate::util::{decode_array, into_map, remove};

@@ -1,7 +1,5 @@
 //! Challonge Tournament type.
 
-extern crate serde_json;
-
 use chrono::*;
 use serde_json::Value;
 use std::fmt;
@@ -673,7 +671,6 @@ impl fmt::Display for TournamentState {
 
 #[cfg(test)]
 mod tests {
-    extern crate serde_json;
     use crate::tournament::{Tournament, TournamentId, TournamentType};
 
     #[test]

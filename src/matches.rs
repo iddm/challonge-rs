@@ -1,7 +1,5 @@
 //! Challonge Match type.
 
-extern crate serde_json;
-
 use chrono::*;
 use serde_json::Value;
 use std::fmt;

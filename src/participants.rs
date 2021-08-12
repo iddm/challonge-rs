@@ -1,7 +1,5 @@
 //! Challonge Participant type.
 
-extern crate serde_json;
-
 use chrono::*;
 use serde_json::Value;
 

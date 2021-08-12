@@ -222,9 +222,7 @@ impl Challonge {
     /// Create new connection to Challonge.
     /// # Example
     /// ```ignore
-    /// extern crate challonge;
-    ///
-    /// use self::challonge::Challonge;
+    /// use challonge::Challonge;
     ///
     /// let c = Challonge::new("myusername", "myapikey");
     /// ```
@@ -240,12 +238,9 @@ impl Challonge {
     /// Retrieve a set of tournaments created with your account.
     /// # Example
     /// ```ignore
-    /// extern crate challonge;
-    /// extern crate chrono;
-    ///
-    /// use self::challonge::Challonge;
-    /// use self::challonge::tournament::{ TournamentState, TournamentType };
-    /// use self::chrono::*;
+    /// use challonge::Challonge;
+    /// use challonge::tournament::{ TournamentState, TournamentType };
+    /// use chrono::*;
     ///
     /// let c = Challonge::new("myusername", "myapikey");
     /// let index = c.tournament_index (
@@ -281,8 +276,6 @@ impl Challonge {
     /// Retrieve a single tournament record created with your account.
     /// # Example
     /// ```ignore
-    /// extern crate challonge;
-    ///
     /// use challonge::Challonge;
     ///
     /// let c = Challonge::new("myusername", "myapikey");
@@ -306,8 +299,6 @@ impl Challonge {
     /// Create a new tournament.
     /// # Example
     /// ```ignore
-    /// extern crate challonge;
-    ///
     /// use challonge::Challonge;
     /// use challonge::tournament::TournamentCreate;
     ///
