@@ -1,6 +1,6 @@
 [package]
 name = "challonge"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Victor Polevoy <maintainer@vpolevoy.com>"]
 
 description = "Client library for the Challonge REST API"
@@ -12,7 +12,10 @@ repository = "https://github.com/vityafx/challonge-rs"
 documentation = "https://vityafx.github.io/challonge-rs/0.4.0/challonge/"
 
 [dependencies]
-hyper = "0.9.7"
-serde_json = "0.7.4"
-chrono = "0.2"
-log = "0.3.6"
+reqwest = { version = "0.11", features = ["blocking"] }
+#hyper = { version = "0.14", features = ["client", "http2", "tcp"] }
+base64 = "0.13"
+#headers = "0.3"
+serde_json = "0.7"
+chrono = "0.4"
+log = "0.4"

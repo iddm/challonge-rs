@@ -1,18 +1,12 @@
 //! Challonge REST API error type.
 
-extern crate hyper;
-extern crate serde_json;
-
 use serde_json::Error as JsonError;
 
 /// Challonge REST API error type.
 #[derive(Debug)]
 pub enum Error {
     /// A `hyper` crate error
-    Hyper(hyper::Error),
-
-    /// A generic non-success response from the REST API
-    Status(hyper::status::StatusCode, Option<serde_json::Value>),
+    Reqwest(reqwest::Error),
 
     /// A `serde_json` crate error
     Json(JsonError),
@@ -23,17 +17,9 @@ pub enum Error {
     /// Challonge-rs error.
     Api(&'static str),
 }
-impl Error {
-    /// Creates a `Error` from `hyper`'s client response.
-    pub fn error_from_response(response: hyper::client::Response) -> Error {
-        let status = response.status;
-        let value = ::serde_json::from_reader(response).ok();
-        Error::Status(status, value)
-    }
-}
-impl From<hyper::Error> for Error {
-    fn from(err: hyper::Error) -> Error {
-        Error::Hyper(err)
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Error {
+        Error::Reqwest(err)
     }
 }
 impl From<JsonError> for Error {

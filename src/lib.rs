@@ -10,12 +10,15 @@
 
 #[macro_use]
 extern crate log;
+extern crate base64;
 extern crate chrono;
-extern crate hyper;
+// extern crate headers;
+extern crate reqwest;
+// extern crate hyper;
 extern crate serde_json;
 
-use chrono::date::Date;
-use chrono::offset::local::Local;
+use chrono::offset::Local;
+use chrono::Date;
 #[macro_use]
 mod macroses;
 pub mod attachments;
@@ -37,34 +40,24 @@ pub use tournament::{
 
 const API_BASE: &'static str = "https://api.challonge.com/v1";
 
-fn check_status(
-    response: hyper::Result<hyper::client::Response>,
-) -> Result<hyper::client::Response, Error> {
-    let response = try!(response);
-    if !response.status.is_success() {
-        return Err(Error::error_from_response(response));
-    }
-    Ok(response)
-}
+fn make_headers(user_name: String, api_key: String) -> reqwest::header::HeaderMap {
+    // use headers::Authorization;
+    // use headers::Header;
 
-fn retry<'a, F: Fn() -> hyper::client::RequestBuilder<'a>>(
-    f: F,
-) -> Result<hyper::client::Response, Error> {
-    let f2 = || check_status(f().send());
-    // retry on a ConnectionAborted, which occurs if it's been a while since the last request
-    match f2() {
-        // Err(hyper::error::Error::Io(ref io))
-        //     if io.kind() == std::io::ErrorKind::ConnectionAborted => f2(),
-        other => other,
-    }
-}
-
-fn make_headers(user_name: String, api_key: String) -> hyper::header::Headers {
-    let mut headers = hyper::header::Headers::new();
-    headers.set(hyper::header::Authorization(hyper::header::Basic {
-        username: user_name,
-        password: Some(api_key),
-    }));
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(
+        reqwest::header::AUTHORIZATION,
+        format!(
+            "Basic {}",
+            base64::encode(format!("{}:{}", user_name, api_key))
+        )
+        .parse()
+        .unwrap(),
+    );
+    // let auth_header = Authorization::basic(&user_name, &api_key);
+    // let mut value = headers::HeaderValue::;
+    // headers.extend(.encode(values));
+    // headers.insert(hyper::header::AUTHORIZATION, Authorization::basic(&user_name, &api_key).encode().);
     headers
 }
 
@@ -231,8 +224,7 @@ fn mu_to_pairs(mu: &MatchUpdate) -> FieldPairs {
 
 /// Client for the Challonge REST API.
 pub struct Challonge {
-    headers: hyper::header::Headers,
-    client: hyper::client::Client,
+    client: reqwest::blocking::Client,
 }
 impl Challonge {
     /// Create new connection to Challonge.
@@ -246,8 +238,10 @@ impl Challonge {
     /// ```
     pub fn new<S: Into<String>>(user_name: S, api_key: S) -> Challonge {
         Challonge {
-            client: hyper::Client::new(),
-            headers: make_headers(user_name.into(), api_key.into()),
+            client: reqwest::blocking::Client::builder()
+                .default_headers(make_headers(user_name.into(), api_key.into()))
+                .build()
+                .expect("Couldn't build the HTTP client."),
         }
     }
 
@@ -278,19 +272,18 @@ impl Challonge {
         created_before: &Date<Local>,
         subdomain: &str,
     ) -> Result<TournamentIndex, Error> {
-        let mut url = hyper::Url::parse(&format!("{}/tournaments.json", API_BASE)).unwrap();
-        url.query_pairs_mut()
-            .append_pair("state", &state.to_string())
-            .append_pair("type", &tournament_type.to_get_param())
-            .append_pair("created_after", &format_date!(created_after))
-            .append_pair("created_before", &format_date!(created_before))
-            .append_pair("subdomain", subdomain);
+        let url = format!(
+            "{}/tournaments.json?state={}&type={}&created_after={}&created_before={}&subdomain={}",
+            API_BASE,
+            state,
+            tournament_type.to_get_param(),
+            format_date!(created_after),
+            format_date!(created_before),
+            subdomain
+        );
 
-        let response = try!(retry(|| self
-            .client
-            .get(url.as_str())
-            .headers(self.headers.clone())));
-        TournamentIndex::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.get(&url).send()?;
+        TournamentIndex::decode(serde_json::from_reader(response)?)
     }
 
     /// Retrieve a single tournament record created with your account.
@@ -310,15 +303,12 @@ impl Challonge {
         includes: &TournamentIncludes,
     ) -> Result<Tournament, Error> {
         let mut url =
-            hyper::Url::parse(&format!("{}/tournaments/{}.json", API_BASE, id.to_string()))
+            reqwest::Url::parse(&format!("{}/tournaments/{}.json", API_BASE, id.to_string()))
                 .unwrap();
 
         Challonge::add_tournament_includes(&mut url, includes);
-        let response = try!(retry(|| self
-            .client
-            .get(url.as_str())
-            .headers(self.headers.clone())));
-        Tournament::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.get(url).send()?;
+        Tournament::decode(serde_json::from_reader(response)?)
     }
 
     /// Create a new tournament.
@@ -372,12 +362,8 @@ impl Challonge {
     pub fn create_tournament(&self, tournament: &TournamentCreate) -> Result<Tournament, Error> {
         let url = &format!("{}/tournaments.json", API_BASE);
         let body = pairs_to_string(tc_to_pairs(tournament));
-        let response = try!(retry(|| self
-            .client
-            .post(url)
-            .headers(self.headers.clone())
-            .body(&body)));
-        Tournament::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.post(url).body(body).send()?;
+        Tournament::decode(serde_json::from_reader(response)?)
     }
 
     /// Update a tournament's attributes.
@@ -388,21 +374,14 @@ impl Challonge {
     ) -> Result<Tournament, Error> {
         let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
         let body = pairs_to_string(tc_to_pairs(tournament));
-        let response = try!(retry(|| self
-            .client
-            .put(url)
-            .headers(self.headers.clone())
-            .body(&body)));
-        Tournament::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.put(url).body(body).send()?;
+        Tournament::decode(serde_json::from_reader(response)?)
     }
 
     /// Deletes a tournament along with all its associated records. There is no undo, so use with care!
     pub fn delete_tournament(&self, id: &TournamentId) -> Result<(), Error> {
         let url = &format!("{}/tournaments/{}.json", API_BASE, id.to_string());
-        let _ = try!(retry(|| self
-            .client
-            .delete(url)
-            .headers(self.headers.clone())));
+        let _ = self.client.delete(url).send()?;
         Ok(())
     }
 
@@ -467,8 +446,8 @@ impl Challonge {
             API_BASE,
             id.to_string()
         );
-        let response = try!(retry(|| self.client.get(url).headers(self.headers.clone())));
-        ParticipantIndex::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.get(url).send()?;
+        ParticipantIndex::decode(serde_json::from_reader(response)?)
     }
 
     /// Add a participant to a tournament (up until it is started).
@@ -483,12 +462,8 @@ impl Challonge {
             id.to_string()
         );
         let body = pairs_to_string(pc_to_pairs(participant));
-        let response = try!(retry(|| self
-            .client
-            .post(url)
-            .headers(self.headers.clone())
-            .body(&body)));
-        Participant::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.post(url).body(body).send()?;
+        Participant::decode(serde_json::from_reader(response)?)
     }
 
     /// Bulk add participants to a tournament (up until it is started).
@@ -504,12 +479,8 @@ impl Challonge {
             id.to_string()
         );
         let body = pairs_to_string(pcs_to_pairs(participants));
-        let response = try!(retry(|| self
-            .client
-            .post(url)
-            .headers(self.headers.clone())
-            .body(&body)));
-        let _: () = try!(serde_json::from_reader(response));
+        let response = self.client.post(url).body(body).send()?;
+        let _: () = serde_json::from_reader(response)?;
         Ok(())
     }
 
@@ -520,21 +491,19 @@ impl Challonge {
         participant_id: &ParticipantId,
         include_matches: bool,
     ) -> Result<Participant, Error> {
-        let mut url = hyper::Url::parse(&format!(
+        let mut url = reqwest::Url::parse(&format!(
             "{}/tournaments/{}/participants/{}.json",
             API_BASE,
             id.to_string(),
             participant_id.0
         ))
         .unwrap();
+
         url.query_pairs_mut()
             .append_pair("include_matches", &(include_matches as i64).to_string());
 
-        let response = try!(retry(|| self
-            .client
-            .get(url.as_str())
-            .headers(self.headers.clone())));
-        Participant::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.get(url).send()?;
+        Participant::decode(serde_json::from_reader(response)?)
     }
 
     /// Update the attributes of a tournament participant.
@@ -551,11 +520,7 @@ impl Challonge {
             participant_id.0
         );
         let body = pairs_to_string(pc_to_pairs(participant));
-        let _ = try!(retry(|| self
-            .client
-            .put(url)
-            .headers(self.headers.clone())
-            .body(&body)));
+        let _ = self.client.put(url).body(body).send()?;
         Ok(())
     }
 
@@ -571,10 +536,7 @@ impl Challonge {
             id.to_string(),
             participant_id.0
         );
-        let _ = try!(retry(|| self
-            .client
-            .post(url)
-            .headers(self.headers.clone())));
+        let _ = self.client.post(url).send()?;
         Ok(())
     }
 
@@ -590,10 +552,7 @@ impl Challonge {
             id.to_string(),
             participant_id.0
         );
-        let _ = try!(retry(|| self
-            .client
-            .post(url)
-            .headers(self.headers.clone())));
+        let _ = self.client.post(url).send()?;
         Ok(())
     }
 
@@ -610,10 +569,7 @@ impl Challonge {
             id.to_string(),
             participant_id.0
         );
-        let _ = try!(retry(|| self
-            .client
-            .delete(url)
-            .headers(self.headers.clone())));
+        let _ = self.client.delete(url).send()?;
         Ok(())
     }
 
@@ -624,10 +580,7 @@ impl Challonge {
             API_BASE,
             id.to_string()
         );
-        let _ = try!(retry(|| self
-            .client
-            .post(url)
-            .headers(self.headers.clone())));
+        let _ = self.client.post(url).send()?;
         Ok(())
     }
 
@@ -638,7 +591,7 @@ impl Challonge {
         state: Option<MatchState>,
         participant_id: Option<ParticipantId>,
     ) -> Result<MatchIndex, Error> {
-        let mut url = hyper::Url::parse(&format!(
+        let mut url = reqwest::Url::parse(&format!(
             "{}/tournaments/{}/matches.json",
             API_BASE,
             id.to_string()
@@ -653,11 +606,8 @@ impl Challonge {
                 pairs.append_pair("participant_id", &pid.0.to_string());
             }
         }
-        let response = try!(retry(|| self
-            .client
-            .get(url.as_str())
-            .headers(self.headers.clone())));
-        MatchIndex::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.get(url.as_str()).send()?;
+        MatchIndex::decode(serde_json::from_reader(response)?)
     }
 
     /// Retrieve a single match record for a tournament.
@@ -667,22 +617,22 @@ impl Challonge {
         match_id: &MatchId,
         include_attachments: bool,
     ) -> Result<Match, Error> {
-        let mut url = hyper::Url::parse(&format!(
+        let mut url = reqwest::Url::parse(&format!(
             "{}/tournaments/{}/matches/{}.json",
             API_BASE,
             id.to_string(),
             match_id.0
         ))
         .unwrap();
+
         url.query_pairs_mut().append_pair(
             "include_attachments",
             &(include_attachments as i64).to_string(),
         );
-        let response = try!(retry(|| self
-            .client
-            .get(url.as_str())
-            .headers(self.headers.clone())));
-        Match::decode(try!(serde_json::from_reader(response)))
+
+        let response = self.client.get(url.as_str()).send()?;
+
+        Match::decode(serde_json::from_reader(response)?)
     }
 
     /// Update/submit the score(s) for a match.
@@ -699,12 +649,8 @@ impl Challonge {
             match_id.0
         );
         let body = pairs_to_string(mu_to_pairs(match_update));
-        let response = try!(retry(|| self
-            .client
-            .put(url)
-            .headers(self.headers.clone())
-            .body(&body)));
-        Match::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.put(url).body(body).send()?;
+        Match::decode(serde_json::from_reader(response)?)
     }
 
     /// Retrieve a match's attachments.
@@ -719,8 +665,8 @@ impl Challonge {
             id.to_string(),
             match_id.0
         );
-        let response = try!(retry(|| self.client.get(url).headers(self.headers.clone())));
-        AttachmentIndex::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.get(url).send()?;
+        AttachmentIndex::decode(serde_json::from_reader(response)?)
     }
 
     /// Retrieve a single match attachment record.
@@ -737,8 +683,8 @@ impl Challonge {
             match_id.0,
             attachment_id.0
         );
-        let response = try!(retry(|| self.client.get(url).headers(self.headers.clone())));
-        Attachment::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.get(url).send()?;
+        Attachment::decode(serde_json::from_reader(response)?)
     }
 
     /// Add a file, link, or text attachment to a match. NOTE: The associated tournament's "accept_attachments" attribute must be true for this action to succeed.
@@ -755,12 +701,8 @@ impl Challonge {
             match_id.0
         );
         let body = pairs_to_string(at_to_pairs(attachment));
-        let response = try!(retry(|| self
-            .client
-            .post(url)
-            .headers(self.headers.clone())
-            .body(&body)));
-        Attachment::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.post(url).body(body).send()?;
+        Attachment::decode(serde_json::from_reader(response)?)
     }
 
     /// Update the attributes of a match attachment.
@@ -779,12 +721,8 @@ impl Challonge {
             attachment_id.0
         );
         let body = pairs_to_string(at_to_pairs(attachment));
-        let response = try!(retry(|| self
-            .client
-            .put(url)
-            .headers(self.headers.clone())
-            .body(&body)));
-        Attachment::decode(try!(serde_json::from_reader(response)))
+        let response = self.client.put(url).body(body).send()?;
+        Attachment::decode(serde_json::from_reader(response)?)
     }
 
     /// Delete a match attachment.
@@ -801,10 +739,7 @@ impl Challonge {
             match_id.0,
             attachment_id.0
         );
-        let _ = try!(retry(|| self
-            .client
-            .delete(url)
-            .headers(self.headers.clone())));
+        let _ = self.client.delete(url).send()?;
         Ok(())
     }
 
@@ -814,7 +749,7 @@ impl Challonge {
         id: &TournamentId,
         includes: &TournamentIncludes,
     ) -> Result<(), Error> {
-        let mut url = hyper::Url::parse(&format!(
+        let mut url = reqwest::Url::parse(&format!(
             "{}/tournaments/{}/{}.json",
             API_BASE,
             id.to_string(),
@@ -822,15 +757,12 @@ impl Challonge {
         ))
         .unwrap();
         Challonge::add_tournament_includes(&mut url, includes);
-        let _ = try!(retry(|| self
-            .client
-            .post(url.as_str())
-            .headers(self.headers.clone())));
+        let _ = self.client.post(url.as_str()).send()?;
         Ok(())
     }
 
     // TODO refactor to be better
-    fn add_tournament_includes(url: &mut hyper::Url, includes: &TournamentIncludes) {
+    fn add_tournament_includes(url: &mut reqwest::Url, includes: &TournamentIncludes) {
         let mut pairs = url.query_pairs_mut();
         match *includes {
             TournamentIncludes::All => {
@@ -850,14 +782,4 @@ impl Challonge {
             }
         }
     }
-
-    // fn prepare<'a>(&self, url: &str) -> hyper::client::RequestBuilder<'a> {
-    //     self.client.get(url).headers(self.headers.clone())
-    // }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {}
 }

@@ -241,7 +241,7 @@ pub struct TournamentCreate {
     pub signup_cap: u64,
 
     /// the planned or anticipated start time for the tournament (Used with check_in_duration to determine participant check-in window). Timezone defaults to Eastern.
-    pub start_at: Option<DateTime<UTC>>,
+    pub start_at: Option<DateTime<Utc>>,
 
     /// Length of the participant check-in window in minutes.
     pub check_in_duration: u64,
