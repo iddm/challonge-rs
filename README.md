@@ -1,6 +1,7 @@
 # challonge-rs 
-[![](https://meritbadge.herokuapp.com/challonge)](https://crates.io/crates/challonge) [![](https://docs.rs/challonge/badge.svg)](https://docs.rs/challonge)
-[![Build Status](https://travis-ci.org/vityafx/challonge-rs.svg?branch=master)](https://travis-ci.org/vityafx/challonge-rs)
+[![Crates badge](https://img.shields.io/crates/v/challonge.svg)](https://crates.io/crates/challonge-rs)
+[![CI](https://github.com/vityafx/challonge-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/vityafx/challonge-rs/actions/workflows/ci.yml)
+[![Documentation](https://docs.rs/challonge/badge.svg)](https://docs.rs/challonge)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 
