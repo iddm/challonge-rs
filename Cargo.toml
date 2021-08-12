@@ -1,6 +1,6 @@
 [package]
 name = "challonge"
-version = "0.5.2"
+version = "0.5.3"
 authors = ["Victor Polevoy <maintainer@vpolevoy.com>"]
 
 description = "Client library for the Challonge REST API"
