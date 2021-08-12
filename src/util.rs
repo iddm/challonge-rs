@@ -20,8 +20,6 @@ pub fn into_map(value: Value) -> Result<BTreeMap<String, Value>, Error> {
 }
 
 pub fn remove(map: &mut BTreeMap<String, Value>, key: &str) -> Result<Value, Error> {
-    map.remove(key).ok_or(Error::Decode(
-        "Unexpected absent key",
-        Value::String(key.into()),
-    ))
+    map.remove(key)
+        .ok_or_else(|| Error::Decode("Unexpected absent key", Value::String(key.into())))
 }

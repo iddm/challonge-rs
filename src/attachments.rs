@@ -29,14 +29,14 @@ impl Asset {
     /// Decodes `Asset` from `Attachment`'s JSON
     pub fn decode(mut map: &mut BTreeMap<String, Value>) -> Result<Asset, Error> {
         Ok(Asset {
-            file_name: try!(remove(&mut map, "asset_file_name"))
+            file_name: remove(&mut map, "asset_file_name")?
                 .as_string()
                 .map_or(None, |f| Some(f.to_owned())),
-            content_type: try!(remove(&mut map, "asset_content_type"))
+            content_type: remove(&mut map, "asset_content_type")?
                 .as_string()
                 .map_or(None, |f| Some(f.to_owned())),
-            file_size: try!(remove(&mut map, "asset_file_size")).as_u64(),
-            url: try!(remove(&mut map, "asset_url"))
+            file_size: remove(&mut map, "asset_file_size")?.as_u64(),
+            url: remove(&mut map, "asset_url")?
                 .as_string()
                 .map_or(None, |f| Some(f.to_owned())),
         })
@@ -109,33 +109,29 @@ pub struct Attachment {
 impl Attachment {
     /// Decodes `Attachment` from JSON
     pub fn decode(value: Value) -> Result<Attachment, Error> {
-        let mut value = try!(into_map(value));
-        let t = try!(remove(&mut value, "match_attachment"));
-        let mut tv = try!(into_map(t));
+        let mut value = into_map(value)?;
+        let t = remove(&mut value, "match_attachment")?;
+        let mut tv = into_map(t)?;
 
         Ok(Attachment {
-            id: AttachmentId(try!(remove(&mut tv, "id")).as_u64().unwrap()),
-            match_id: MatchId(try!(remove(&mut tv, "match_id")).as_u64().unwrap()),
-            user_id: try!(remove(&mut tv, "user_id")).as_u64().unwrap(),
-            description: try!(remove(&mut tv, "description"))
+            id: AttachmentId(remove(&mut tv, "id")?.as_u64().unwrap()),
+            match_id: MatchId(remove(&mut tv, "match_id")?.as_u64().unwrap()),
+            user_id: remove(&mut tv, "user_id")?.as_u64().unwrap(),
+            description: remove(&mut tv, "description")?
                 .as_string()
                 .map_or(None, |f| Some(f.to_owned())),
-            url: try!(remove(&mut tv, "url"))
+            url: remove(&mut tv, "url")?
                 .as_string()
                 .map_or(None, |f| Some(f.to_owned())),
-            original_file_name: try!(remove(&mut tv, "original_file_name"))
+            original_file_name: remove(&mut tv, "original_file_name")?
                 .as_string()
                 .map_or(None, |f| Some(f.to_owned())),
             created_at: DateTime::parse_from_rfc3339(
-                try!(remove(&mut tv, "created_at"))
-                    .as_string()
-                    .unwrap_or(""),
+                remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
             )
             .unwrap(),
             updated_at: DateTime::parse_from_rfc3339(
-                try!(remove(&mut tv, "updated_at"))
-                    .as_string()
-                    .unwrap_or(""),
+                remove(&mut tv, "updated_at")?.as_string().unwrap_or(""),
             )
             .unwrap(),
             asset: Asset::decode(&mut tv).unwrap(),
@@ -150,7 +146,7 @@ pub struct Index(pub Vec<Attachment>);
 impl Index {
     /// Decodes attachment index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        Ok(Index(try!(decode_array(value, Attachment::decode))))
+        Ok(Index(decode_array(value, Attachment::decode)?))
     }
 }
 

@@ -8,8 +8,6 @@
 //! For examples, see the `examples` directory in the source tree.
 #![warn(missing_docs)]
 
-#[macro_use]
-extern crate log;
 extern crate base64;
 extern crate chrono;
 extern crate reqwest;

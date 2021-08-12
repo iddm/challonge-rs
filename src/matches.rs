@@ -38,8 +38,7 @@ impl MatchScore {
 }
 impl fmt::Display for MatchScore {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(fmt.write_str(&format!("{}-{}", self.0, self.1)));
-        Ok(())
+        fmt.write_str(&format!("{}-{}", self.0, self.1))
     }
 }
 
@@ -67,8 +66,7 @@ impl fmt::Display for MatchScores {
             scores.push_str(&format!("{}{}", sep, s.to_string()));
             sep = ",";
         }
-        try!(fmt.write_str(&scores));
-        Ok(())
+        fmt.write_str(&scores)
     }
 }
 
@@ -94,30 +92,21 @@ pub enum MatchState {
 impl fmt::Display for MatchState {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            MatchState::All => {
-                try!(fmt.write_str("all"));
-            }
-            MatchState::Pending => {
-                try!(fmt.write_str("pending"));
-            }
-            MatchState::Open => {
-                try!(fmt.write_str("open"));
-            }
-            MatchState::Complete => {
-                try!(fmt.write_str("complete"));
-            }
+            MatchState::All => fmt.write_str("all"),
+            MatchState::Pending => fmt.write_str("pending"),
+            MatchState::Open => fmt.write_str("open"),
+            MatchState::Complete => fmt.write_str("complete"),
         }
-        Ok(())
     }
 }
 impl FromStr for MatchState {
     type Err = ();
     fn from_str(s: &str) -> Result<MatchState, ()> {
         match s {
-            "all" => return Ok(MatchState::All),
-            "pending" => return Ok(MatchState::Pending),
-            "open" => return Ok(MatchState::Open),
-            "complete" => return Ok(MatchState::Complete),
+            "all" => Ok(MatchState::All),
+            "pending" => Ok(MatchState::Pending),
+            "open" => Ok(MatchState::Open),
+            "complete" => Ok(MatchState::Complete),
             _ => Err(()),
         }
     }
@@ -130,7 +119,7 @@ pub struct Index(pub Vec<Match>);
 impl Index {
     /// Decodes match index from JSON.
     pub fn decode(value: Value) -> Result<Index, Error> {
-        Ok(Index(try!(decode_array(value, Match::decode))))
+        Ok(Index(decode_array(value, Match::decode)?))
     }
 }
 
@@ -184,20 +173,17 @@ impl Player {
     pub fn decode(mut map: &mut BTreeMap<String, Value>, prefix: &str) -> Result<Player, Error> {
         Ok(Player {
             id: ParticipantId(
-                try!(remove(&mut map, &format!("{}id", prefix)))
+                remove(&mut map, &format!("{}id", prefix))?
                     .as_u64()
                     .unwrap_or(0),
             ),
-            is_prereq_match_loser: try!(remove(
-                &mut map,
-                &format!("{}is_prereq_match_loser", prefix)
-            ))
-            .as_boolean()
-            .unwrap_or(false),
-            prereq_match_id: try!(remove(&mut map, &format!("{}prereq_match_id", prefix)))
+            is_prereq_match_loser: remove(&mut map, &format!("{}is_prereq_match_loser", prefix))?
+                .as_boolean()
+                .unwrap_or(false),
+            prereq_match_id: remove(&mut map, &format!("{}prereq_match_id", prefix))?
                 .as_u64()
                 .map_or(None, |i| Some(MatchId(i))),
-            votes: try!(remove(&mut map, &format!("{}votes", prefix)))
+            votes: remove(&mut map, &format!("{}votes", prefix))?
                 .as_u64()
                 .unwrap_or(0),
         })
@@ -256,12 +242,12 @@ pub struct Match {
 impl Match {
     /// Decodes `Match` from JSON
     pub fn decode(value: Value) -> Result<Match, Error> {
-        let mut value = try!(into_map(value));
-        let t = try!(remove(&mut value, "match"));
-        let mut tv = try!(into_map(t));
+        let mut value = into_map(value)?;
+        let t = remove(&mut value, "match")?;
+        let mut tv = into_map(t)?;
 
         let mut started_at = None;
-        if let Some(sa_str) = try!(remove(&mut tv, "started_at")).as_string() {
+        if let Some(sa_str) = remove(&mut tv, "started_at")?.as_string() {
             if let Ok(sa) = DateTime::parse_from_rfc3339(sa_str) {
                 started_at = Some(sa);
             }
@@ -269,46 +255,40 @@ impl Match {
 
         Ok(Match {
             created_at: DateTime::parse_from_rfc3339(
-                try!(remove(&mut tv, "created_at"))
-                    .as_string()
-                    .unwrap_or(""),
+                remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
             )
             .unwrap(),
-            has_attachment: try!(remove(&mut tv, "has_attachment"))
+            has_attachment: remove(&mut tv, "has_attachment")?
                 .as_boolean()
                 .unwrap_or(false),
-            id: MatchId(try!(remove(&mut tv, "id")).as_u64().unwrap()),
-            identifier: try!(remove(&mut tv, "identifier"))
+            id: MatchId(remove(&mut tv, "id")?.as_u64().unwrap()),
+            identifier: remove(&mut tv, "identifier")?
                 .as_string()
                 .unwrap_or("")
                 .to_owned(),
-            loser_id: try!(remove(&mut tv, "loser_id"))
+            loser_id: remove(&mut tv, "loser_id")?
                 .as_u64()
                 .map_or(None, |i| Some(ParticipantId(i))),
             player1: Player::decode(&mut tv, "player1_").unwrap(),
             player2: Player::decode(&mut tv, "player2_").unwrap(),
-            round: try!(remove(&mut tv, "round")).as_u64().unwrap(),
+            round: remove(&mut tv, "round")?.as_u64().unwrap(),
             started_at: started_at,
-            state: MatchState::from_str(try!(remove(&mut tv, "state")).as_string().unwrap_or(""))
+            state: MatchState::from_str(remove(&mut tv, "state")?.as_string().unwrap_or(""))
                 .unwrap_or(MatchState::All),
-            tournament_id: TournamentId::Id(
-                try!(remove(&mut tv, "tournament_id")).as_u64().unwrap(),
-            ),
+            tournament_id: TournamentId::Id(remove(&mut tv, "tournament_id")?.as_u64().unwrap()),
             updated_at: DateTime::parse_from_rfc3339(
-                try!(remove(&mut tv, "updated_at"))
-                    .as_string()
-                    .unwrap_or(""),
+                remove(&mut tv, "updated_at")?.as_string().unwrap_or(""),
             )
             .unwrap(),
-            winner_id: try!(remove(&mut tv, "winner_id"))
+            winner_id: remove(&mut tv, "winner_id")?
                 .as_u64()
                 .map_or(None, |i| Some(ParticipantId(i))),
-            prerequisite_match_ids_csv: try!(remove(&mut tv, "prerequisite_match_ids_csv"))
+            prerequisite_match_ids_csv: remove(&mut tv, "prerequisite_match_ids_csv")?
                 .as_string()
                 .unwrap_or("")
                 .to_owned(),
             scores_csv: MatchScores::decode(
-                try!(remove(&mut tv, "scores_csv"))
+                remove(&mut tv, "scores_csv")?
                     .as_string()
                     .unwrap_or("")
                     .to_owned(),
