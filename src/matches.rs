@@ -272,9 +272,7 @@ impl Match {
                 .as_string()
                 .unwrap_or("")
                 .to_owned(),
-            loser_id: remove(&mut tv, "loser_id")?
-                .as_u64()
-                .map(ParticipantId),
+            loser_id: remove(&mut tv, "loser_id")?.as_u64().map(ParticipantId),
             player1: Player::decode(&mut tv, "player1_").unwrap(),
             player2: Player::decode(&mut tv, "player2_").unwrap(),
             round: remove(&mut tv, "round")?.as_u64().unwrap(),
@@ -286,9 +284,7 @@ impl Match {
                 remove(&mut tv, "updated_at")?.as_string().unwrap_or(""),
             )
             .unwrap(),
-            winner_id: remove(&mut tv, "winner_id")?
-                .as_u64()
-                .map(ParticipantId),
+            winner_id: remove(&mut tv, "winner_id")?.as_u64().map(ParticipantId),
             prerequisite_match_ids_csv: remove(&mut tv, "prerequisite_match_ids_csv")?
                 .as_string()
                 .unwrap_or("")
@@ -321,14 +317,14 @@ mod tests {
             MatchScore(9, 0),
             MatchScore(0, 118),
         ];
-        let mut iter = strings.iter().zip(correct_scores.iter());
-        while let Some(pair) = iter.next() {
+        let iter = strings.iter().zip(correct_scores.iter());
+        for pair in iter {
             if let Ok(ms) = MatchScore::decode(pair.0) {
                 assert_eq!(ms.0, (pair.1).0);
                 assert_eq!(ms.1, (pair.1).1);
                 assert_eq!(ms.to_string(), (pair.1).to_string());
             } else {
-                assert!(false);
+                unreachable!();
             }
         }
     }
@@ -372,15 +368,15 @@ mod tests {
             // assert_eq!(m.attachment_count, );
             // assert_eq!(m.created_at, );
             // assert_eq!(m.group_id, );
-            assert_eq!(m.has_attachment, false);
+            assert!(!m.has_attachment);
             assert_eq!(m.id.0, 23575258);
             assert_eq!(m.identifier, "A");
             assert_eq!(m.loser_id, None);
             assert_eq!(m.player1.id.0, 16543993);
-            assert_eq!(m.player1.is_prereq_match_loser, false);
+            assert!(!m.player1.is_prereq_match_loser);
             assert_eq!(m.player1.prereq_match_id, None);
             assert_eq!(m.player1.votes, 0);
-            assert_eq!(m.player2.is_prereq_match_loser, false);
+            assert!(!m.player2.is_prereq_match_loser);
             assert_eq!(m.player2.prereq_match_id, None);
             assert_eq!(m.player2.id.0, 16543997);
             assert_eq!(m.player2.votes, 3);
@@ -394,14 +390,14 @@ mod tests {
             {
                 let correct_scores = vec![MatchScore(3, 1), MatchScore(3, 2)];
                 assert_eq!(m.scores_csv.0.len(), 2);
-                let mut iter = m.scores_csv.0.iter().zip(correct_scores.iter());
-                while let Some(pair) = iter.next() {
+                let iter = m.scores_csv.0.iter().zip(correct_scores.iter());
+                for pair in iter {
                     assert_eq!((pair.0).0, (pair.1).0);
-                    assert_eq!((pair.1).1, (pair.1).1);
+                    assert_eq!((pair.0).1, (pair.1).1);
                 }
             }
         } else {
-            assert!(false);
+            unreachable!();
         }
     }
 }

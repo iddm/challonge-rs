@@ -126,9 +126,7 @@ impl Attachment {
             description: remove(&mut tv, "description")?
                 .as_string()
                 .map(|f| f.to_owned()),
-            url: remove(&mut tv, "url")?
-                .as_string()
-                .map(|f| f.to_owned()),
+            url: remove(&mut tv, "url")?.as_string().map(|f| f.to_owned()),
             original_file_name: remove(&mut tv, "original_file_name")?
                 .as_string()
                 .map(|f| f.to_owned()),
@@ -180,7 +178,7 @@ mod tests {
             assert_eq!(m.asset.file_size, None);
             assert_eq!(m.asset.url, None);
         } else {
-            assert!(false);
+            unreachable!();
         }
     }
 
@@ -193,7 +191,7 @@ mod tests {
         if let Ok(i) = Index::decode(json) {
             assert_eq!(i.0.len(), 2);
         } else {
-            assert!(false);
+            unreachable!();
         }
     }
 }

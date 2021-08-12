@@ -304,7 +304,7 @@ mod tests {
         assert!(json_r.is_ok());
         let json = json_r.unwrap();
         if let Ok(p) = Participant::decode(json) {
-            assert_eq!(p.active, true);
+            assert!(p.active);
             assert_eq!(p.checked_in_at, None);
             // assert_eq!(p.created_at, );
             assert_eq!(p.final_rank, None);
@@ -315,16 +315,16 @@ mod tests {
             assert!(p.invite_email.is_empty());
             assert!(p.misc.is_empty());
             assert_eq!(p.name, "Participant #1");
-            assert_eq!(p.on_waiting_list, false);
+            assert!(!p.on_waiting_list);
             assert_eq!(p.seed, 1);
             assert_eq!(p.tournament_id, 1086875);
             // assert_eq!(p.updated_at, );
             assert!(p.challonge_username.is_empty());
             assert!(p.challonge_email_address_verified.is_empty());
-            assert_eq!(p.removable, true);
-            assert_eq!(p.participatable_or_invitation_attached, false);
-            assert_eq!(p.confirm_remove, true);
-            assert_eq!(p.invitation_pending, false);
+            assert!(p.removable);
+            assert!(!p.participatable_or_invitation_attached);
+            assert!(p.confirm_remove);
+            assert!(!p.invitation_pending);
             assert_eq!(
                 p.display_name_with_invitation_email_address,
                 "Participant #1"
@@ -332,11 +332,11 @@ mod tests {
             assert!(p.email_hash.is_empty());
             assert!(p.username.is_empty());
             assert!(p.attached_participatable_portrait_url.is_empty());
-            assert_eq!(p.can_check_in, false);
-            assert_eq!(p.checked_in, false);
-            assert_eq!(p.reactivatable, false);
+            assert!(!p.can_check_in);
+            assert!(!p.checked_in);
+            assert!(!p.reactivatable);
         } else {
-            assert!(false);
+            unreachable!(false);
         }
     }
 }

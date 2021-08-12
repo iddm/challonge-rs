@@ -770,49 +770,51 @@ mod tests {
         assert!(json_r.is_ok());
         let json = json_r.unwrap();
         if let Ok(t) = Tournament::decode(json) {
-            assert_eq!(t.accept_attachments, false);
-            assert_eq!(t.allow_participant_match_reporting, true);
-            assert_eq!(t.anonymous_voting, false);
+            assert!(!t.accept_attachments);
+            assert!(t.allow_participant_match_reporting);
+            assert!(!t.anonymous_voting);
             // assert_eq!(t.created_at, DateTime<);
-            assert_eq!(t.created_by_api, false);
+            assert!(!t.created_by_api);
             assert_eq!(t.description, "sample description");
-            assert_eq!(t.credit_capped, false);
+            assert!(!t.credit_capped);
             assert_eq!(t.game_id, 600);
             if let TournamentId::Id(num) = t.id {
                 assert_eq!(num, 1086875);
             } else {
                 // Id should be parsed as numeric variable here.
-                assert!(false);
+                unreachable!();
             }
             assert_eq!(t.name, "Sample Tournament 1");
-            assert_eq!(t.group_stages_enabled, false);
-            assert_eq!(t.hide_forum, false);
-            assert_eq!(t.hide_seeds, false);
-            assert_eq!(t.hold_third_place_match, false);
+            assert!(!t.group_stages_enabled);
+            assert!(!t.hide_forum);
+            assert!(!t.hide_seeds);
+            assert!(!t.hold_third_place_match);
             assert_eq!(t.max_predictions_per_user, 1);
-            assert_eq!(t.notify_users_when_matches_open, true);
-            assert_eq!(t.notify_users_when_the_tournament_ends, true);
-            assert_eq!(t.open_signup, false);
+            assert!(t.notify_users_when_matches_open);
+            assert!(t.notify_users_when_the_tournament_ends);
+            assert!(!t.open_signup);
             assert_eq!(t.participants_count, 4);
             assert_eq!(t.prediction_method, 0);
-            assert_eq!(t.private, false);
+            assert!(!t.private);
             assert_eq!(t.progress_meter, 0);
-            assert_eq!(t.swiss_points.bye, Some(1.0f64));
-            assert_eq!(t.swiss_points.game_tie, 0.0f64);
-            assert_eq!(t.swiss_points.game_win, 0.0f64);
-            assert_eq!(t.swiss_points.match_tie, 0.5f64);
-            assert_eq!(t.swiss_points.match_win, 1.0f64);
-            assert_eq!(t.quick_advance, false);
-            assert_eq!(t.require_score_agreement, false);
-            assert_eq!(t.round_robin_points.game_tie, 0.0f64);
-            assert_eq!(t.round_robin_points.game_win, 0.0f64);
-            assert_eq!(t.round_robin_points.match_tie, 0.5f64);
-            assert_eq!(t.round_robin_points.match_win, 1.0f64);
-            assert_eq!(t.sequential_pairings, false);
-            assert_eq!(t.show_rounds, true);
+            assert_eq!(t.swiss_points.bye.map(|b| b as u64), Some(1));
+            assert_eq!(t.swiss_points.game_tie as u64, 0);
+            assert_eq!(t.swiss_points.game_win as u64, 0);
+            assert!(t.swiss_points.match_tie > 0.5f64 - f64::EPSILON);
+            assert!(t.swiss_points.match_tie < 0.5f64 + f64::EPSILON);
+            assert_eq!(t.swiss_points.match_win as u64, 1);
+            assert!(!t.quick_advance);
+            assert!(!t.require_score_agreement);
+            assert_eq!(t.round_robin_points.game_tie as u64, 0);
+            assert_eq!(t.round_robin_points.game_win as u64, 0);
+            assert!(t.round_robin_points.match_tie > 0.5f64 - f64::EPSILON);
+            assert!(t.round_robin_points.match_tie < 0.5f64 + f64::EPSILON);
+            assert_eq!(t.round_robin_points.match_win as u64, 1);
+            assert!(!t.sequential_pairings);
+            assert!(t.show_rounds);
             // assert_eq!(t.started_at, DateTime<);
             assert_eq!(t.swiss_rounds, 0);
-            assert_eq!(t.teams, false);
+            assert!(!t.teams);
             assert_eq!(t.tournament_type, TournamentType::SingleElimination);
             // assert_eq!(t.updated_at, DateTime<);
             assert_eq!(t.url, "sample_tournament_1");
@@ -825,15 +827,15 @@ mod tests {
                 t.live_image_url,
                 "http://images.challonge.com/sample_tournament_1.png"
             );
-            assert_eq!(t.review_before_finalizing, true);
-            assert_eq!(t.accepting_predictions, false);
-            assert_eq!(t.participants_locked, true);
+            assert!(t.review_before_finalizing);
+            assert!(!t.accepting_predictions);
+            assert!(t.participants_locked);
             assert_eq!(t.game_name, "Table Tennis");
-            assert_eq!(t.participants_swappable, false);
-            assert_eq!(t.team_convertable, false);
-            assert_eq!(t.group_stages_were_started, false);
+            assert!(!t.participants_swappable);
+            assert!(!t.team_convertable);
+            assert!(!t.group_stages_were_started);
         } else {
-            assert!(false);
+            unreachable!();
         }
     }
 }
