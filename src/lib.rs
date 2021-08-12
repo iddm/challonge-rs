@@ -10,11 +10,9 @@
 
 #[macro_use]
 extern crate log;
-extern crate base64;
 extern crate chrono;
-// extern crate headers;
+extern crate base64;
 extern crate reqwest;
-// extern crate hyper;
 extern crate serde_json;
 
 use chrono::offset::Local;

@@ -13,9 +13,7 @@ documentation = "https://vityafx.github.io/challonge-rs/0.4.0/challonge/"
 
 [dependencies]
 reqwest = { version = "0.11", features = ["blocking"] }
-#hyper = { version = "0.14", features = ["client", "http2", "tcp"] }
 base64 = "0.13"
-#headers = "0.3"
 serde_json = "0.7"
 chrono = "0.4"
 log = "0.4"
