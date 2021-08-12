@@ -10,8 +10,8 @@
 
 #[macro_use]
 extern crate log;
-extern crate chrono;
 extern crate base64;
+extern crate chrono;
 extern crate reqwest;
 extern crate serde_json;
 
