@@ -14,6 +14,10 @@ Client library for the [Challonge](https://challonge.com) REST API.
 ## Documentation
 [Challonge API documentation](http://api.challonge.com/ru/v1/documents).
 
+## Features
+- `default` - uses `rustls` backend for `reqwest`.
+- `default-tls` - uses `default-tls` backend for `reqwest`.
+
 ## Examples
 See the `examples` directory in the source tree.
 
