@@ -165,98 +165,85 @@ impl Participant {
         let mut tv = into_map(t)?;
 
         let mut checked_in_at = None;
-        if let Some(ci_str) = remove(&mut tv, "checked_in_at")?.as_string() {
+        if let Some(ci_str) = remove(&mut tv, "checked_in_at")?.as_str() {
             if let Ok(ci) = DateTime::parse_from_rfc3339(ci_str) {
                 checked_in_at = Some(ci);
             }
         }
 
         Ok(Participant {
-            active: remove(&mut tv, "active")?.as_boolean().unwrap_or(false),
+            active: remove(&mut tv, "active")?.as_bool().unwrap_or(false),
             checked_in_at,
             created_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
+                remove(&mut tv, "created_at")?.as_str().unwrap_or(""),
             )
             .unwrap(),
             final_rank: remove(&mut tv, "final_rank")?.as_u64(),
             group_id: remove(&mut tv, "group_id")?.as_u64(),
-            icon: remove(&mut tv, "icon")?
-                .as_string()
-                .unwrap_or("")
-                .to_owned(),
+            icon: remove(&mut tv, "icon")?.as_str().unwrap_or("").to_owned(),
             id: ParticipantId(remove(&mut tv, "id")?.as_u64().unwrap()),
             invitation_id: remove(&mut tv, "invitation_id")?.as_u64(),
             invite_email: remove(&mut tv, "invite_email")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned(),
-            misc: remove(&mut tv, "misc")?
-                .as_string()
-                .unwrap_or("")
-                .to_owned(),
-            name: remove(&mut tv, "name")?
-                .as_string()
-                .unwrap_or("")
-                .to_owned(),
+            misc: remove(&mut tv, "misc")?.as_str().unwrap_or("").to_owned(),
+            name: remove(&mut tv, "name")?.as_str().unwrap_or("").to_owned(),
             on_waiting_list: remove(&mut tv, "on_waiting_list")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             seed: remove(&mut tv, "seed")?.as_u64().unwrap(),
             tournament_id: remove(&mut tv, "tournament_id")?.as_u64().unwrap(),
             updated_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "updated_at")?.as_string().unwrap_or(""),
+                remove(&mut tv, "updated_at")?.as_str().unwrap_or(""),
             )
             .unwrap(),
             challonge_username: remove(&mut tv, "challonge_username")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned(),
             challonge_email_address_verified: remove(&mut tv, "challonge_email_address_verified")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned(),
-            removable: remove(&mut tv, "removable")?.as_boolean().unwrap_or(false),
+            removable: remove(&mut tv, "removable")?.as_bool().unwrap_or(false),
             participatable_or_invitation_attached: remove(
                 &mut tv,
                 "participatable_or_invitation_attached",
             )?
-            .as_boolean()
+            .as_bool()
             .unwrap_or(false),
             confirm_remove: remove(&mut tv, "confirm_remove")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             invitation_pending: remove(&mut tv, "invitation_pending")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             display_name_with_invitation_email_address: remove(
                 &mut tv,
                 "display_name_with_invitation_email_address",
             )?
-            .as_string()
+            .as_str()
             .unwrap_or("")
             .to_owned(),
             email_hash: remove(&mut tv, "email_hash")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned(),
             username: remove(&mut tv, "username")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned(),
             attached_participatable_portrait_url: remove(
                 &mut tv,
                 "attached_participatable_portrait_url",
             )?
-            .as_string()
+            .as_str()
             .unwrap_or("")
             .to_owned(),
-            checked_in: remove(&mut tv, "checked_in")?.as_boolean().unwrap_or(false),
-            can_check_in: remove(&mut tv, "can_check_in")?
-                .as_boolean()
-                .unwrap_or(false),
-            reactivatable: remove(&mut tv, "reactivatable")?
-                .as_boolean()
-                .unwrap_or(false),
+            checked_in: remove(&mut tv, "checked_in")?.as_bool().unwrap_or(false),
+            can_check_in: remove(&mut tv, "can_check_in")?.as_bool().unwrap_or(false),
+            reactivatable: remove(&mut tv, "reactivatable")?.as_bool().unwrap_or(false),
         })
     }
 }

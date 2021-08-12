@@ -4,7 +4,6 @@ extern crate serde_json;
 
 use chrono::*;
 use serde_json::Value;
-use std::collections::BTreeMap;
 use std::fmt;
 use std::str::FromStr;
 
@@ -130,37 +129,37 @@ impl GamePoints {
 
     /// Decode `GamePoints` from JSON.
     pub fn decode(
-        mut map: &mut BTreeMap<String, Value>,
+        mut map: &mut serde_json::Map<String, Value>,
         prefix: &str,
     ) -> Result<GamePoints, Error> {
         let mut bye = None;
         if let Ok(bye_pts) = remove(&mut map, &format!("{}pts_for_bye", prefix)) {
-            if let Ok(b) = bye_pts.as_string().unwrap_or("").to_owned().parse::<f64>() {
+            if let Ok(b) = bye_pts.as_str().unwrap_or("").to_owned().parse::<f64>() {
                 bye = Some(b);
             }
         }
 
         Ok(GamePoints {
             match_win: remove(&mut map, &format!("{}pts_for_match_win", prefix))?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned()
                 .parse::<f64>()
                 .unwrap_or(0f64),
             match_tie: remove(&mut map, &format!("{}pts_for_match_tie", prefix))?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned()
                 .parse::<f64>()
                 .unwrap_or(0f64),
             game_win: remove(&mut map, &format!("{}pts_for_game_win", prefix))?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned()
                 .parse::<f64>()
                 .unwrap_or(0f64),
             game_tie: remove(&mut map, &format!("{}pts_for_game_tie", prefix))?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned()
                 .parse::<f64>()
@@ -456,7 +455,7 @@ impl Tournament {
         let mut tv = into_map(t)?;
 
         let mut started_at = None;
-        if let Some(dt_str) = remove(&mut tv, "started_at")?.as_string() {
+        if let Some(dt_str) = remove(&mut tv, "started_at")?.as_str() {
             if let Ok(dt) = DateTime::parse_from_rfc3339(dt_str) {
                 started_at = Some(dt);
             }
@@ -464,128 +463,112 @@ impl Tournament {
 
         Ok(Tournament {
             accept_attachments: remove(&mut tv, "accept_attachments")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             allow_participant_match_reporting: remove(
                 &mut tv,
                 "allow_participant_match_reporting",
             )?
-            .as_boolean()
+            .as_bool()
             .unwrap_or(false),
             anonymous_voting: remove(&mut tv, "anonymous_voting")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             created_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
+                remove(&mut tv, "created_at")?.as_str().unwrap_or(""),
             )
             .unwrap(),
             created_by_api: remove(&mut tv, "created_by_api")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
-            credit_capped: remove(&mut tv, "credit_capped")?
-                .as_boolean()
-                .unwrap_or(false),
+            credit_capped: remove(&mut tv, "credit_capped")?.as_bool().unwrap_or(false),
             description: remove(&mut tv, "description")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_string(),
             game_id: remove(&mut tv, "game_id")?.as_u64().unwrap_or(0),
             id: TournamentId::Id(remove(&mut tv, "id")?.as_u64().unwrap_or(0)),
-            name: remove(&mut tv, "name")?
-                .as_string()
-                .unwrap_or("")
-                .to_string(),
+            name: remove(&mut tv, "name")?.as_str().unwrap_or("").to_string(),
             group_stages_enabled: remove(&mut tv, "group_stages_enabled")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
-            hide_forum: remove(&mut tv, "hide_forum")?.as_boolean().unwrap_or(false),
-            hide_seeds: remove(&mut tv, "hide_seeds")?.as_boolean().unwrap_or(false),
+            hide_forum: remove(&mut tv, "hide_forum")?.as_bool().unwrap_or(false),
+            hide_seeds: remove(&mut tv, "hide_seeds")?.as_bool().unwrap_or(false),
             hold_third_place_match: remove(&mut tv, "hold_third_place_match")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             max_predictions_per_user: remove(&mut tv, "max_predictions_per_user")?
                 .as_u64()
                 .unwrap_or(0),
             notify_users_when_matches_open: remove(&mut tv, "notify_users_when_matches_open")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             notify_users_when_the_tournament_ends: remove(
                 &mut tv,
                 "notify_users_when_the_tournament_ends",
             )?
-            .as_boolean()
+            .as_bool()
             .unwrap_or(false),
-            open_signup: remove(&mut tv, "open_signup")?
-                .as_boolean()
-                .unwrap_or(false),
+            open_signup: remove(&mut tv, "open_signup")?.as_bool().unwrap_or(false),
             participants_count: remove(&mut tv, "participants_count")?.as_u64().unwrap_or(0),
             prediction_method: remove(&mut tv, "prediction_method")?.as_u64().unwrap_or(0),
-            private: remove(&mut tv, "private")?.as_boolean().unwrap_or(false),
+            private: remove(&mut tv, "private")?.as_bool().unwrap_or(false),
             progress_meter: remove(&mut tv, "progress_meter")?.as_u64().unwrap_or(0),
             swiss_points: GamePoints::decode(&mut tv, "").unwrap(),
-            quick_advance: remove(&mut tv, "quick_advance")?
-                .as_boolean()
-                .unwrap_or(false),
+            quick_advance: remove(&mut tv, "quick_advance")?.as_bool().unwrap_or(false),
             require_score_agreement: remove(&mut tv, "require_score_agreement")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             round_robin_points: GamePoints::decode(&mut tv, "rr_").unwrap(),
             sequential_pairings: remove(&mut tv, "sequential_pairings")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
-            show_rounds: remove(&mut tv, "show_rounds")?
-                .as_boolean()
-                .unwrap_or(false),
+            show_rounds: remove(&mut tv, "show_rounds")?.as_bool().unwrap_or(false),
             started_at,
             swiss_rounds: remove(&mut tv, "swiss_rounds")?.as_u64().unwrap_or(0),
-            teams: remove(&mut tv, "teams")?.as_boolean().unwrap_or(false),
+            teams: remove(&mut tv, "teams")?.as_bool().unwrap_or(false),
             tournament_type: TournamentType::from_str(
-                remove(&mut tv, "tournament_type")?
-                    .as_string()
-                    .unwrap_or(""),
+                remove(&mut tv, "tournament_type")?.as_str().unwrap_or(""),
             )
             .unwrap_or(TournamentType::SingleElimination),
             updated_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "updated_at")?.as_string().unwrap(),
+                remove(&mut tv, "updated_at")?.as_str().unwrap(),
             )
             .unwrap(),
-            url: remove(&mut tv, "url")?
-                .as_string()
-                .unwrap_or("")
-                .to_string(),
+            url: remove(&mut tv, "url")?.as_str().unwrap_or("").to_string(),
             description_source: remove(&mut tv, "description_source")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_string(),
             full_challonge_url: remove(&mut tv, "full_challonge_url")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_string(),
             live_image_url: remove(&mut tv, "live_image_url")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_string(),
             review_before_finalizing: remove(&mut tv, "review_before_finalizing")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             accepting_predictions: remove(&mut tv, "accepting_predictions")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             participants_locked: remove(&mut tv, "participants_locked")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             game_name: remove(&mut tv, "game_name")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_string(),
             participants_swappable: remove(&mut tv, "participants_swappable")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             team_convertable: remove(&mut tv, "team_convertable")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             group_stages_were_started: remove(&mut tv, "group_stages_were_started")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
         })
     }

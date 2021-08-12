@@ -3,11 +3,9 @@
 extern crate serde_json;
 
 use chrono::*;
-use serde_json::Value;
-use std::collections::BTreeMap;
-
 use error::Error;
 use matches::MatchId;
+use serde_json::Value;
 use util::{decode_array, into_map, remove};
 
 /// Asset of a attachment
@@ -27,17 +25,17 @@ pub struct Asset {
 }
 impl Asset {
     /// Decodes `Asset` from `Attachment`'s JSON
-    pub fn decode(mut map: &mut BTreeMap<String, Value>) -> Result<Asset, Error> {
+    pub fn decode(mut map: &mut serde_json::Map<String, Value>) -> Result<Asset, Error> {
         Ok(Asset {
             file_name: remove(&mut map, "asset_file_name")?
-                .as_string()
+                .as_str()
                 .map(|f| f.to_owned()),
             content_type: remove(&mut map, "asset_content_type")?
-                .as_string()
+                .as_str()
                 .map(|f| f.to_owned()),
             file_size: remove(&mut map, "asset_file_size")?.as_u64(),
             url: remove(&mut map, "asset_url")?
-                .as_string()
+                .as_str()
                 .map(|f| f.to_owned()),
         })
     }
@@ -124,18 +122,18 @@ impl Attachment {
             match_id: MatchId(remove(&mut tv, "match_id")?.as_u64().unwrap()),
             user_id: remove(&mut tv, "user_id")?.as_u64().unwrap(),
             description: remove(&mut tv, "description")?
-                .as_string()
+                .as_str()
                 .map(|f| f.to_owned()),
-            url: remove(&mut tv, "url")?.as_string().map(|f| f.to_owned()),
+            url: remove(&mut tv, "url")?.as_str().map(|f| f.to_owned()),
             original_file_name: remove(&mut tv, "original_file_name")?
-                .as_string()
+                .as_str()
                 .map(|f| f.to_owned()),
             created_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
+                remove(&mut tv, "created_at")?.as_str().unwrap_or(""),
             )
             .unwrap(),
             updated_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "updated_at")?.as_string().unwrap_or(""),
+                remove(&mut tv, "updated_at")?.as_str().unwrap_or(""),
             )
             .unwrap(),
             asset: Asset::decode(&mut tv).unwrap(),

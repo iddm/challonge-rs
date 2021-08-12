@@ -4,7 +4,6 @@ extern crate serde_json;
 
 use chrono::*;
 use serde_json::Value;
-use std::collections::BTreeMap;
 use std::fmt;
 use std::str::FromStr;
 
@@ -176,7 +175,10 @@ pub struct Player {
 }
 impl Player {
     /// Decodes `Player` from JSON
-    pub fn decode(mut map: &mut BTreeMap<String, Value>, prefix: &str) -> Result<Player, Error> {
+    pub fn decode(
+        mut map: &mut serde_json::Map<String, Value>,
+        prefix: &str,
+    ) -> Result<Player, Error> {
         Ok(Player {
             id: ParticipantId(
                 remove(&mut map, &format!("{}id", prefix))?
@@ -184,7 +186,7 @@ impl Player {
                     .unwrap_or(0),
             ),
             is_prereq_match_loser: remove(&mut map, &format!("{}is_prereq_match_loser", prefix))?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             prereq_match_id: remove(&mut map, &format!("{}prereq_match_id", prefix))?
                 .as_u64()
@@ -253,7 +255,7 @@ impl Match {
         let mut tv = into_map(t)?;
 
         let mut started_at = None;
-        if let Some(sa_str) = remove(&mut tv, "started_at")?.as_string() {
+        if let Some(sa_str) = remove(&mut tv, "started_at")?.as_str() {
             if let Ok(sa) = DateTime::parse_from_rfc3339(sa_str) {
                 started_at = Some(sa);
             }
@@ -261,15 +263,15 @@ impl Match {
 
         Ok(Match {
             created_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
+                remove(&mut tv, "created_at")?.as_str().unwrap_or(""),
             )
             .unwrap(),
             has_attachment: remove(&mut tv, "has_attachment")?
-                .as_boolean()
+                .as_bool()
                 .unwrap_or(false),
             id: MatchId(remove(&mut tv, "id")?.as_u64().unwrap()),
             identifier: remove(&mut tv, "identifier")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned(),
             loser_id: remove(&mut tv, "loser_id")?.as_u64().map(ParticipantId),
@@ -277,21 +279,21 @@ impl Match {
             player2: Player::decode(&mut tv, "player2_").unwrap(),
             round: remove(&mut tv, "round")?.as_u64().unwrap(),
             started_at,
-            state: MatchState::from_str(remove(&mut tv, "state")?.as_string().unwrap_or(""))
+            state: MatchState::from_str(remove(&mut tv, "state")?.as_str().unwrap_or(""))
                 .unwrap_or(MatchState::All),
             tournament_id: TournamentId::Id(remove(&mut tv, "tournament_id")?.as_u64().unwrap()),
             updated_at: DateTime::parse_from_rfc3339(
-                remove(&mut tv, "updated_at")?.as_string().unwrap_or(""),
+                remove(&mut tv, "updated_at")?.as_str().unwrap_or(""),
             )
             .unwrap(),
             winner_id: remove(&mut tv, "winner_id")?.as_u64().map(ParticipantId),
             prerequisite_match_ids_csv: remove(&mut tv, "prerequisite_match_ids_csv")?
-                .as_string()
+                .as_str()
                 .unwrap_or("")
                 .to_owned(),
             scores_csv: MatchScores::decode(
                 remove(&mut tv, "scores_csv")?
-                    .as_string()
+                    .as_str()
                     .unwrap_or("")
                     .to_owned(),
             ),
