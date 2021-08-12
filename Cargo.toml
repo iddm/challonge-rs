@@ -6,10 +6,10 @@ authors = ["Victor Polevoy <maintainer@vpolevoy.com>"]
 description = "Client library for the Challonge REST API"
 readme = "README.md"
 license = "MIT"
-keywords = ["game", "challonge", "tourney", "tournament", "api", "system"]
+keywords = ["game", "challonge", "tournament", "api", "system"]
 
 repository = "https://github.com/vityafx/challonge-rs"
-documentation = "https://vityafx.github.io/challonge-rs/0.4.0/challonge/"
+documentation = "https://docs.rs/challonge/"
 
 [dependencies]
 reqwest = { version = "0.11", features = ["blocking"] }
