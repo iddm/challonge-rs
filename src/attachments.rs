@@ -31,14 +31,14 @@ impl Asset {
         Ok(Asset {
             file_name: remove(&mut map, "asset_file_name")?
                 .as_string()
-                .map_or(None, |f| Some(f.to_owned())),
+                .map(|f| f.to_owned()),
             content_type: remove(&mut map, "asset_content_type")?
                 .as_string()
-                .map_or(None, |f| Some(f.to_owned())),
+                .map(|f| f.to_owned()),
             file_size: remove(&mut map, "asset_file_size")?.as_u64(),
             url: remove(&mut map, "asset_url")?
                 .as_string()
-                .map_or(None, |f| Some(f.to_owned())),
+                .map(|f| f.to_owned()),
         })
     }
 }
@@ -69,6 +69,12 @@ impl AttachmentCreate {
     builder_o!(asset, Vec<u8>);
     builder_so!(url);
     builder_so!(description);
+}
+
+impl Default for AttachmentCreate {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 /// Unique attachment id
@@ -119,13 +125,13 @@ impl Attachment {
             user_id: remove(&mut tv, "user_id")?.as_u64().unwrap(),
             description: remove(&mut tv, "description")?
                 .as_string()
-                .map_or(None, |f| Some(f.to_owned())),
+                .map(|f| f.to_owned()),
             url: remove(&mut tv, "url")?
                 .as_string()
-                .map_or(None, |f| Some(f.to_owned())),
+                .map(|f| f.to_owned()),
             original_file_name: remove(&mut tv, "original_file_name")?
                 .as_string()
-                .map_or(None, |f| Some(f.to_owned())),
+                .map(|f| f.to_owned()),
             created_at: DateTime::parse_from_rfc3339(
                 remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
             )

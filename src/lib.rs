@@ -34,7 +34,7 @@ pub use tournament::{
     TournamentState, TournamentType,
 };
 
-const API_BASE: &'static str = "https://api.challonge.com/v1";
+const API_BASE: &str = "https://api.challonge.com/v1";
 
 fn make_headers(user_name: String, api_key: String) -> reqwest::header::HeaderMap {
     // use headers::Authorization;

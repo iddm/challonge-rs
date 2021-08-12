@@ -53,6 +53,12 @@ impl ParticipantCreate {
     builder_s!(misc);
 }
 
+impl Default for ParticipantCreate {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// A list of participants for the tournament.
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -167,7 +173,7 @@ impl Participant {
 
         Ok(Participant {
             active: remove(&mut tv, "active")?.as_boolean().unwrap_or(false),
-            checked_in_at: checked_in_at,
+            checked_in_at,
             created_at: DateTime::parse_from_rfc3339(
                 remove(&mut tv, "created_at")?.as_string().unwrap_or(""),
             )

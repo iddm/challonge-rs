@@ -120,11 +120,11 @@ impl GamePoints {
         bye: Option<f64>,
     ) -> GamePoints {
         GamePoints {
-            match_win: match_win,
-            match_tie: match_tie,
-            game_win: game_win,
-            game_tie: game_tie,
-            bye: bye,
+            match_win,
+            match_tie,
+            game_win,
+            game_tie,
+            bye,
         }
     }
 
@@ -165,7 +165,7 @@ impl GamePoints {
                 .to_owned()
                 .parse::<f64>()
                 .unwrap_or(0f64),
-            bye: bye,
+            bye,
         })
     }
 }
@@ -297,6 +297,12 @@ impl TournamentCreate {
     builder!(signup_cap, u64);
     builder!(check_in_duration, u64);
     builder!(grand_finals_modifier, Option<String>);
+}
+
+impl Default for TournamentCreate {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 /// Challonge `Tournament` definition.
@@ -530,7 +536,7 @@ impl Tournament {
             show_rounds: remove(&mut tv, "show_rounds")?
                 .as_boolean()
                 .unwrap_or(false),
-            started_at: started_at,
+            started_at,
             swiss_rounds: remove(&mut tv, "swiss_rounds")?.as_u64().unwrap_or(0),
             teams: remove(&mut tv, "teams")?.as_boolean().unwrap_or(false),
             tournament_type: TournamentType::from_str(

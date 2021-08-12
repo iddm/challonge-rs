@@ -49,8 +49,8 @@ impl MatchScores {
     /// Decodes `MatchScores` from JSON.
     pub fn decode(string: String) -> MatchScores {
         let mut scores = Vec::new();
-        let mut iter = string.split(",");
-        while let Some(s) = iter.next() {
+        let iter = string.split(',');
+        for s in iter {
             if let Ok(ms) = MatchScore::decode(s.trim()) {
                 scores.push(ms);
             }
@@ -156,6 +156,12 @@ impl MatchUpdate {
     builder_o!(player2_votes, u64);
 }
 
+impl Default for MatchUpdate {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Player data in match.
 #[derive(Debug, Clone)]
 pub struct Player {
@@ -182,7 +188,7 @@ impl Player {
                 .unwrap_or(false),
             prereq_match_id: remove(&mut map, &format!("{}prereq_match_id", prefix))?
                 .as_u64()
-                .map_or(None, |i| Some(MatchId(i))),
+                .map(MatchId),
             votes: remove(&mut map, &format!("{}votes", prefix))?
                 .as_u64()
                 .unwrap_or(0),
@@ -268,11 +274,11 @@ impl Match {
                 .to_owned(),
             loser_id: remove(&mut tv, "loser_id")?
                 .as_u64()
-                .map_or(None, |i| Some(ParticipantId(i))),
+                .map(ParticipantId),
             player1: Player::decode(&mut tv, "player1_").unwrap(),
             player2: Player::decode(&mut tv, "player2_").unwrap(),
             round: remove(&mut tv, "round")?.as_u64().unwrap(),
-            started_at: started_at,
+            started_at,
             state: MatchState::from_str(remove(&mut tv, "state")?.as_string().unwrap_or(""))
                 .unwrap_or(MatchState::All),
             tournament_id: TournamentId::Id(remove(&mut tv, "tournament_id")?.as_u64().unwrap()),
@@ -282,7 +288,7 @@ impl Match {
             .unwrap(),
             winner_id: remove(&mut tv, "winner_id")?
                 .as_u64()
-                .map_or(None, |i| Some(ParticipantId(i))),
+                .map(ParticipantId),
             prerequisite_match_ids_csv: remove(&mut tv, "prerequisite_match_ids_csv")?
                 .as_string()
                 .unwrap_or("")
