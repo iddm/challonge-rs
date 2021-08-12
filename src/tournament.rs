@@ -7,8 +7,8 @@ use serde_json::Value;
 use std::fmt;
 use std::str::FromStr;
 
-use error::Error;
-use util::{decode_array, into_map, remove};
+use crate::error::Error;
+use crate::util::{decode_array, into_map, remove};
 
 /// Tournament includes.
 #[derive(Debug, Clone)]
@@ -674,7 +674,7 @@ impl fmt::Display for TournamentState {
 #[cfg(test)]
 mod tests {
     extern crate serde_json;
-    use tournament::{Tournament, TournamentId, TournamentType};
+    use crate::tournament::{Tournament, TournamentId, TournamentType};
 
     #[test]
     fn test_tournament_parse() {

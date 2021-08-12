@@ -5,8 +5,8 @@ extern crate serde_json;
 use chrono::*;
 use serde_json::Value;
 
-use error::Error;
-use util::{decode_array, into_map, remove};
+use crate::error::Error;
+use crate::util::{decode_array, into_map, remove};
 
 /// Represents an ID of a participant
 #[derive(Debug, Clone, PartialEq)]
@@ -250,8 +250,7 @@ impl Participant {
 
 #[cfg(test)]
 mod tests {
-    extern crate serde_json;
-    use participants::Participant;
+    use crate::participants::Participant;
 
     #[test]
     fn test_participant_parse() {

@@ -1,4 +1,4 @@
-use error::Error;
+use crate::error::Error;
 use serde_json::Value;
 
 pub fn decode_array<T, F: Fn(Value) -> Result<T, Error>>(

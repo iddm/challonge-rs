@@ -2,11 +2,11 @@
 
 extern crate serde_json;
 
+use crate::error::Error;
+use crate::matches::MatchId;
+use crate::util::{decode_array, into_map, remove};
 use chrono::*;
-use error::Error;
-use matches::MatchId;
 use serde_json::Value;
-use util::{decode_array, into_map, remove};
 
 /// Asset of a attachment
 #[derive(Debug, Clone)]
@@ -154,9 +154,7 @@ impl Index {
 
 #[cfg(test)]
 mod tests {
-    extern crate serde_json;
-
-    use attachments::{Attachment, Index};
+    use crate::attachments::{Attachment, Index};
 
     #[test]
     fn test_attachment_parse() {

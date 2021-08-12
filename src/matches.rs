@@ -7,10 +7,10 @@ use serde_json::Value;
 use std::fmt;
 use std::str::FromStr;
 
-use error::Error;
-use participants::ParticipantId;
-use tournament::TournamentId;
-use util::{decode_array, into_map, remove};
+use crate::error::Error;
+use crate::participants::ParticipantId;
+use crate::tournament::TournamentId;
+use crate::util::{decode_array, into_map, remove};
 
 /// Represents a pair of scores - for player 1 and player 2 respectively.
 #[derive(Debug, Clone, PartialEq)]
@@ -303,9 +303,8 @@ impl Match {
 
 #[cfg(test)]
 mod tests {
-    extern crate serde_json;
-    use matches::{Match, MatchScore, MatchState};
-    use tournament::TournamentId;
+    use crate::matches::{Match, MatchScore, MatchState};
+    use crate::tournament::TournamentId;
 
     #[test]
     fn test_score_parse() {

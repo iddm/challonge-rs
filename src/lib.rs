@@ -7,11 +7,7 @@
 //!
 //! For examples, see the `examples` directory in the source tree.
 #![warn(missing_docs)]
-
-extern crate base64;
-extern crate chrono;
-extern crate reqwest;
-extern crate serde_json;
+#![deny(warnings)]
 
 use chrono::offset::Local;
 use chrono::Date;
