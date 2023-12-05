@@ -7,7 +7,7 @@ description = "Client library for the Challonge REST API"
 readme = "README.md"
 license = "MIT"
 keywords = ["game", "challonge", "tournament", "api", "system"]
-repository = "https://github.com/vityafx/challonge-rs"
+repository = "https://github.com/iddm/challonge-rs"
 documentation = "https://docs.rs/challonge/"
 
 [dependencies]
